@@ -295,9 +295,9 @@
                 <!-- End of Topbar -->
                 <section class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">
-                            @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "Início" : ViewContext.RouteData.Values["controller"]?.ToString())
-                        </h1>
+                        <h1 class="h3 mb-0 text-gray-800">@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "Início" : ViewContext.RouteData.Values["controller"]?.ToString())</h1>
+                        <a style="background: #206BA5" href="https://github.com/qzind/tray/releases/download/v2.2.4/qz-tray-2.2.4-x86_64.exe" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Baixar QZ Tray</a>
                     </div>
 
                     @RenderBody()
