@@ -1,1 +1,1 @@
-alert("carasss");
+$(document).ready((function(){$(".collapse-item").on("click",(function(){let l=$(this).data("target");$("#collapseTwo .collapse").not(l).collapse("hide"),$(l).collapse("toggle")}))}));

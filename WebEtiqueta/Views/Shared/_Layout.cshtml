@@ -39,7 +39,7 @@
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Interface
+                Funções
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
@@ -51,14 +51,28 @@
                 </a>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Tipo:</h6>
-                        <a class="collapse-item" asp-area="" asp-controller="Etiqueta" asp-action="Index">
-                            A4
+                        <h6 class="collapse-header">Opções:</h6>
+
+                        <a class="collapse-item" href="login.html">
+                            Imprimir
                         </a>
-                        <a class="collapse-item" href="cards.html">
-                            Outras
+                        
+                        <!-- Subnível  -->
+                         <a class="collapse-item" href="#" data-toggle="collapse" data-target="#collapseOutras" aria-expanded="false" aria-controls="collapseOutras"
+                           style="gap:4px; display:flex; align-items:center; justify-content: space-between"> 
+                            Cadastros
+                             <i class="seta fas fa-chevron-right"></i> 
                         </a>
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        <div id="collapseOutras" class="collapse">
+                            <div class="bg-light py-2 collapse-inner rounded"> 
+                                <a class="collapse-item" href="#">
+                                    A4
+                                </a> 
+                                <a class="collapse-item" href="#">
+                                    Outras
+                                </a> 
+                             </div> 
+                        </div> 
                     </div>
                 </div>
             </li>
@@ -68,10 +82,10 @@
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Configurações
+                Config
             </div>
 
-            <!-- Nav Item - Pages Collapse Menu -->
+            <!-- Nav Item -->
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                    aria-expanded="true" aria-controls="collapsePages">
@@ -80,31 +94,37 @@
                 </a>
                 <div id="collapsePages" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <h6 class="collapse-header">Login Screens:</h6>
-                        <a class="collapse-item" href="login.html">Login</a>
-                        <a class="collapse-item" href="register.html">Register</a>
-                        <a class="collapse-item" href="forgot-password.html">Forgot Password</a>
-                        <div class="collapse-divider"></div>
-                        <h6 class="collapse-header">Other Pages:</h6>
-                        <a class="collapse-item" href="404.html">404 Page</a>
-                        <a class="collapse-item" href="blank.html">Blank Page</a>
-                    </div>
+                        <h6 class="collapse-header">
+                            Opções:
+                        </h6>
+                        <a class="collapse-item" href="login.html">
+                            Usuários
+                        </a>
+                        <a class="collapse-item" href="register.html">
+                            Filiais
+                        </a>
+                        <a class="collapse-item" href="forgot-password.html">
+                            Etiquetas
+                        </a>
+                      </div>
                 </div>
             </li>
 
-            <!-- Nav Item - Charts -->
+            <!-- Nav Item -->
             <li class="nav-item">
                 <a class="nav-link" href="charts.html">
                     <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Usuarios</span>
+                    <span>Usuários</span>
                 </a>
             </li>
 
-            <!-- Nav Item - Tables -->
+            <!-- Nav Item -->
             <li class="nav-item">
-                <a class="nav-link" href="tables.html">
+                <a class="nav-link" href="">
                     <i class="fas fa-fw fa-table"></i>
-                    <span>Tables</span>
+                    <span>
+                        Qz Tray
+                    </span>
                 </a>
             </li>
 
