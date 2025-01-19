@@ -9,12 +9,12 @@ module.exports = function (views) {
             return new HtmlWebpackPlugin({
                 inject: false,
                 templateContent: ({ htmlWebpackPlugin }) => {
-                    const scripts = Object.keys(views[controllerName][viewName])
+                    let scripts = Object.keys(views[controllerName][viewName])
                         .map((fileName) => {
-                            const jsPath = htmlWebpackPlugin.files.js.find((jsPath) =>
+                            let jsPath = htmlWebpackPlugin.files.js.find((jsPath) =>
                                 jsPath.includes(`/${controllerName}/${viewName}/${fileName}.bundle.js`)
                             );
-
+                            console.log(`View caminho ${jsPath}`);
                             if (jsPath) {
                                 return `<script src="${jsPath.replace('/wwwroot', '')}"></script>`;
                             } else {

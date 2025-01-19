@@ -101,12 +101,11 @@ module.exports = {
         new HtmlWebpackPlugin({
             inject: false,
             templateContent: ({ htmlWebpackPlugin }) => {
-                const scripts = Object.keys(groupedEntries.general)
+                let scripts = Object.keys(groupedEntries.general)
                     .map((fileName) => {
-                        const jsPath = htmlWebpackPlugin.files.js.find((jsPath) =>
+                        let jsPath = htmlWebpackPlugin.files.js.find((jsPath) =>
                             jsPath.includes(`/${fileName}.bundle.js`)
                         );
-
                         if (jsPath) {
                             return `<script src="${jsPath.replace('/wwwroot', '')}"></script>`;
                         } else {
