@@ -1,1 +1,1 @@
-$(document).ready((function(){$(".collapse-item").on("click",(function(){let l=$(this).data("target");$("#collapseTwo .collapse").not(l).collapse("hide"),$(l).collapse("toggle")}))}));
+$(document).ready((function(){$(".collapse-item").on("click",(function(){var t=$(this).data("target");$("#collapseTwo .collapse").not(t).collapse("hide"),$(t).collapse("toggle")})),$("#myTable").DataTable(),$('[data-toggle="tooltip"]').tooltip(),$("#recarregarQzTray").click((function(t){t.preventDefault(),alert(),startConnection()}))}));

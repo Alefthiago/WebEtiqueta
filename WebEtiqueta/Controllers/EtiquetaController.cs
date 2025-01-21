@@ -8,5 +8,10 @@ namespace WebEtiqueta.Controllers
         {
             return View();
         }
+
+        public IActionResult A4()
+        {
+            return View("~/Views/Etiqueta/A4/Lista.cshtml");
+        }
     }
 }
