@@ -1,12 +1,10 @@
-﻿// VARIÁVEIS
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const glob = require('glob');
-const path = require('path');
-// /VARIÁVEIS
-
-const webpackControllerConfig = require('./webpack.controller.config');
-const webpackViewConfig = require('./webpack.view.config');
+﻿// Importações
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import * as glob from 'glob';
+import * as path from 'path';
+import webpackControllerConfig from './webpack.controller.config.js';
+import webpackViewConfig from './webpack.view.config.js';
 
 // MAPEAMENTO DOS ARQUIVOS
 function groupEntriesByFolder(pattern) {
@@ -24,14 +22,14 @@ function groupEntriesByFolder(pattern) {
 
         if (parts.length === 1) {
             // Arquivos gerais que devem ser carregados em todas as views
-            entries.general[fileName] = path.resolve(__dirname, file);
+            entries.general[fileName] = path.resolve(file);
         } else if (parts.length === 2) {
             // Arquivos gerais do controller
             let controllerName = parts[0];
             if (!entries.controllers[controllerName]) {
                 entries.controllers[controllerName] = {};
             }
-            entries.controllers[controllerName][fileName] = path.resolve(__dirname, file);
+            entries.controllers[controllerName][fileName] = path.resolve(file);
         } else if (parts.length >= 3) {
             // Arquivos específicos da view
             let controllerName = parts[0];
@@ -42,13 +40,13 @@ function groupEntriesByFolder(pattern) {
             if (!entries.views[controllerName][viewName]) {
                 entries.views[controllerName][viewName] = {};
             }
-            entries.views[controllerName][viewName][fileName] = path.resolve(__dirname, file);
+            entries.views[controllerName][viewName][fileName] = path.resolve(file);
         }
     });
     return entries;
 }
-// /MAPEAMENTO DOS ARQUIVOS
 
+// Mapeamento dos arquivos e transformação em entradas para Webpack
 const groupedEntries = groupEntriesByFolder('./Src/js/**/*.js');
 const flatEntries = {
     ...groupedEntries.general,
@@ -68,17 +66,18 @@ const flatEntries = {
     }, {})
 };
 
-module.exports = {
+// Exportação da configuração do Webpack
+export default {
     mode: 'production',
     entry: flatEntries,
     output: {
         filename: '[name].bundle.js?v=[contenthash]',
-        path: path.resolve(__dirname, './wwwroot/dist/js/'),
+        path: path.resolve('./wwwroot/dist/js/'),
     },
     devServer: {
         webSocketServer: false,
         static: {
-            directory: path.join(__dirname, './wwwroot/dist'),
+            directory: path.join('./wwwroot/dist'),
         },
         hot: false,
         port: 5000,
@@ -116,7 +115,7 @@ module.exports = {
 
                 return scripts || `<!-- Nenhum script encontrado -->`;
             },
-            filename: path.resolve(__dirname, './Views/Shared/Components/Webpack/index.cshtml')
+            filename: path.resolve('./Views/Shared/Components/Webpack/index.cshtml')
         }),
         // Tags dos scripts gerais do controller
         ...webpackControllerConfig(groupedEntries.controllers),

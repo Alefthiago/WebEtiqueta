@@ -1,1 +1,1 @@
-alert("eiteras");
+(()=>{"use strict";alert("eiteras")})();

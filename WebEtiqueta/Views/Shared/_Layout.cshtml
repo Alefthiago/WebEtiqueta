@@ -15,7 +15,13 @@
     <link href="~/css/sb-admin-2.min.css" 
            rel="stylesheet">
 
-    <link href="~/css/dataTables.dataTables.min.css"
+    <link href="~/css/dataTables.dataTables.css"
+          rel="stylesheet">
+
+    <link href="~/css/responsive.dataTables.css"
+          rel="stylesheet">
+          
+    <link href="~/css/rowReorder.dataTables.css"
           rel="stylesheet">
 </head>
 <body id="page-top">
@@ -168,20 +174,32 @@
 
                        
                         <!-- Nav Item - Messages -->
-                        <li class="nav-item dropdown no-arrow mx-1">
-                            <a id="recarregarQzTray" data-toggle="tooltip" data-placement="top" title="Recarregar" href="">
-                                <div class="nav-link" style="gap: 2px;">
-                                    <div id="qz-try-status-spinner" class="spinner-grow text-primary" role="status">
-                                        <span class="sr-only">Carregando...</span>
+                        <li class="nav-item dropdown no-arrow mx-1" style="display:flex; justify-content:center; align-items: center;">
+                            <a id="qzTrayAlert" href="#" class="btn btn-secondary btn-icon-split">
+                                <span class="icon text-white-50" style="display:flex; justify-content:center; align-items: center;">
+                                    <i id="qzTrayAlertIcon" class="fas fa-flag" style="display:none"></i>
+
+                                    <div id="qzTrayAlertSpinner" class="spinner-border spinner-border-sm" role="status">
+                                      <span class="sr-only">Loading...</span>
                                     </div>
-                                    <div id="qz-try-status" style="display:none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
-                                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
-                                        </svg>
-                                        QZ Tray
-                                    </div>
-                                </div>
+                                </span>
+                                <span class="text">QZTray</span>
                             </a>
+                            <!--
+                                <a id="recarregarQzTray" data-toggle="tooltip" data-placement="top" title="Recarregar" href="">
+                                    <div class="nav-link" style="gap: 2px;">
+                                        <div id="qz-try-status-spinner" class="spinner-grow text-primary" role="status">
+                                            <span class="sr-only">Carregando...</span>
+                                        </div>
+                                        <div id="qz-try-status" style="display:none">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
+                                                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+                                            </svg>
+                                            QZ Tray
+                                        </div>
+                                    </div>
+                                </a>
+                            -->
                         </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
@@ -280,9 +298,10 @@
     <!-- Custom scripts for all pages-->
     <script src="~/js/sb-admin-2.min.js"></script>
     <script src="~/js/dataTables.min.js"></script>
-
-
-
+    <script src="~/js/dataTables.responsive.js"></script>
+    <script src="~/js/dataTables.rowReorder.js"></script>
+    <script src="~/js/responsive.dataTables.js"></script>
+    <script src="~/js/rowReorder.dataTables.js"></script>
 
     <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->
     @await Component.InvokeAsync("Webpack", 1)

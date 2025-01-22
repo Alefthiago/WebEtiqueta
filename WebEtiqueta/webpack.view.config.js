@@ -1,10 +1,10 @@
-﻿const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+﻿import * as path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-module.exports = function (views) {
+export default function (views) {
     return Object.keys(views).flatMap((controllerName) => {
         return Object.keys(views[controllerName]).map((viewName) => {
-            let outputPath = path.resolve(__dirname, `./Views/Shared/Components/Webpack/${controllerName}/${viewName}/index.cshtml`);
+            let outputPath = path.resolve('./Views/Shared/Components/Webpack/', controllerName, viewName, 'index.cshtml');
 
             return new HtmlWebpackPlugin({
                 inject: false,

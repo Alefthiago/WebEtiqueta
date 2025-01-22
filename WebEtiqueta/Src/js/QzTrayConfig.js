@@ -1,4 +1,65 @@
-﻿qz.security.setCertificatePromise(function (resolve, reject) {
+﻿export function startConnection(config) {
+    let host = "localhost"; // Default host
+
+    if ($('#qzTrayAlert').hasClass('btn-success') || $('#qzTrayAlert').hasClass('btn-danger')) {
+        $('#qzTrayAlert').hasClass('btn-success') ? $('#qzTrayAlert').removeClass('btn-success') : $('#qzTrayAlert').removeClass('btn-danger');
+        $('#qzTrayAlert').addClass('btn-secondary');
+    }
+
+    if ($('#qzTrayAlertIcon').is(':visible')) {
+        $('#qzTrayAlertIcon').hide();
+        $('#qzTrayAlertSpinner').show();
+    }
+
+    if (host !== "" && host !== 'localhost') {
+        if (config) {
+            config.host = host;
+            config.usingSecure = usingSecure;
+        } else {
+            config = { host: host, usingSecure: usingSecure };
+        }
+    }
+
+    if (!qz.websocket.isActive()) {
+        
+        qz.websocket.connect(config).then(function () {
+            console.log("Conectado ao WebSocket");
+            $('#qzTrayAlert').removeClass('btn-secondary');
+            $('#qzTrayAlert').addClass('btn-success');
+            $('#qzTrayAlertSpinner').hide();
+            $('#qzTrayAlertIcon').show();
+            //$('#qz-try-status').css('color', 'green');
+            //$('#qz-try-status').show();
+            //$('#qz-try-status-spinner').hide();
+        }).catch(function (error) {
+            console.error("Erro ao conectar ao WebSocket:", error);
+            $('#qzTrayAlert').removeClass('btn-secondary');
+            $('#qzTrayAlert').addClass('btn-danger');
+            $('#qzTrayAlertSpinner').hide();
+            $('#qzTrayAlertIcon').show();
+            //$('#qz-try-status').css('color', 'red');
+            //$('#qz-try-status').show();
+            //$('#qz-try-status-spinner').hide();
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao conectar ao QzTray',
+                showCloseButton: true
+            });
+        });
+    } else {
+        //$('#qz-try-status').css('color', 'green');
+        //$('#qz-try-status').show();
+        //$('#qz-try-status-spinner').hide();
+        //console.warn('WebSocket já está ativo');
+
+        Swal.fire({
+            icon: 'warning',
+            title: 'QzTray já está ativo',
+            showCloseButton: true
+        });
+    }
+}
+qz.security.setCertificatePromise(function (resolve, reject) {
     //Preferred method - from server
     //fetch("assets/signing/digital-certificate.txt", {cache: 'no-store', headers: {'Content-Type': 'text/plain'}})
     //.then(function(data) { data.ok ? resolve(data.text()) : reject(data.text()); });
@@ -77,37 +138,3 @@ qz.security.setSignaturePromise(function (toSign) {
         resolve(); // remove this line in live environment
     };
 });
-
-export function startConnection(config) {
-    let host = "localhost"; // Default host
-
-    if (host !== "" && host !== 'localhost') {
-        if (config) {
-            config.host = host;
-            config.usingSecure = usingSecure;
-        } else {
-            config = { host: host, usingSecure: usingSecure };
-        }
-    }
-
-    if (!qz.websocket.isActive()) {
-
-        qz.websocket.connect(config).then(function () {
-            $('#qz-try-status').css('color', 'green');
-            $('#qz-try-status').show();
-            $('#qz-try-status-spinner').hide();
-        }).catch(function (error) {
-            $('#qz-try-status').css('color', 'red');
-            $('#qz-try-status').show();
-            $('#qz-try-status-spinner').hide();
-            console.error("Erro ao conectar ao WebSocket:", error);
-        });
-    } else {
-        $('#qz-try-status').css('color', 'green');
-        $('#qz-try-status').show();
-        $('#qz-try-status-spinner').hide();
-        console.warn('WebSocket já está ativo');
-    }
-}
-
-startConnection();
