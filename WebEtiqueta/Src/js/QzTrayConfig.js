@@ -1,15 +1,6 @@
 ﻿export function startConnection(config) {
+    $('#qzTrayAlert').prop('disabled', true);
     let host = "localhost"; // Default host
-
-    if ($('#qzTrayAlert').hasClass('btn-success') || $('#qzTrayAlert').hasClass('btn-danger')) {
-        $('#qzTrayAlert').hasClass('btn-success') ? $('#qzTrayAlert').removeClass('btn-success') : $('#qzTrayAlert').removeClass('btn-danger');
-        $('#qzTrayAlert').addClass('btn-secondary');
-    }
-
-    if ($('#qzTrayAlertIcon').is(':visible')) {
-        $('#qzTrayAlertIcon').hide();
-        $('#qzTrayAlertSpinner').show();
-    }
 
     if (host !== "" && host !== 'localhost') {
         if (config) {
@@ -21,42 +12,56 @@
     }
 
     if (!qz.websocket.isActive()) {
+        if ($('#qzTrayAlertIcon').is(':visible')) {
+            $('#qzTrayAlertIcon').hide();
+            $('#qzTrayAlertSpinner').show();
+        }
+        if ($('#qzTrayAlert').hasClass('btn-success') || $('#qzTrayAlert').hasClass('btn-danger')) {
+            $('#qzTrayAlert').hasClass('btn-success') ? $('#qzTrayAlert').removeClass('btn-success') : $('#qzTrayAlert').removeClass('btn-danger');
+            $('#qzTrayAlert').addClass('btn-secondary');
+        }
         
         qz.websocket.connect(config).then(function () {
+
             console.log("Conectado ao WebSocket");
             $('#qzTrayAlert').removeClass('btn-secondary');
             $('#qzTrayAlert').addClass('btn-success');
             $('#qzTrayAlertSpinner').hide();
             $('#qzTrayAlertIcon').show();
-            //$('#qz-try-status').css('color', 'green');
-            //$('#qz-try-status').show();
-            //$('#qz-try-status-spinner').hide();
+
+            if ($('#qzTrayAlertIcon').hasClass('fa-exclamation-triangle')) {
+                $('#qzTrayAlertIcon').removeClass('fa-exclamation-triangle');
+                $('#qzTrayAlertIcon').addClass('fa-check');
+            }
+            $('#qzTrayAlert').prop('disabled', false);
         }).catch(function (error) {
+
             console.error("Erro ao conectar ao WebSocket:", error);
             $('#qzTrayAlert').removeClass('btn-secondary');
             $('#qzTrayAlert').addClass('btn-danger');
             $('#qzTrayAlertSpinner').hide();
             $('#qzTrayAlertIcon').show();
-            //$('#qz-try-status').css('color', 'red');
-            //$('#qz-try-status').show();
-            //$('#qz-try-status-spinner').hide();
+
+            if ($('#qzTrayAlertIcon').hasClass('fa-check')) {
+                $('#qzTrayAlertIcon').removeClass('fa-check');
+                $('#qzTrayAlertIcon').addClass('fa-exclamation-triangle');
+            }
+
             Swal.fire({
                 icon: 'error',
                 title: 'Erro ao conectar ao QzTray',
                 showCloseButton: true
             });
+            $('#qzTrayAlert').prop('disabled', false);
         });
     } else {
-        //$('#qz-try-status').css('color', 'green');
-        //$('#qz-try-status').show();
-        //$('#qz-try-status-spinner').hide();
-        //console.warn('WebSocket já está ativo');
-
+        $('#qzTrayAlert').prop('disabled', false);
         Swal.fire({
-            icon: 'warning',
-            title: 'QzTray já está ativo',
+            icon: 'info',
+            title: 'QzTray já está conectado',
             showCloseButton: true
         });
+        //return;
     }
 }
 qz.security.setCertificatePromise(function (resolve, reject) {

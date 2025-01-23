@@ -18,9 +18,10 @@ $(document).ready(function () {
 
     });
 
-    $('#recarregarQzTray').click(function (e) {
+    $('#qzTrayAlert').click(function (e) {
+        $('#qzTrayAlert').prop('disabled', true);
         e.preventDefault();
-        startConnection();
+         startConnection();
     });
 
     startConnection();
