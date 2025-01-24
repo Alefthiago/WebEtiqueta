@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebEtiqueta.Models
 {
+    [Table("ETIQUETA")]
     public class Etiqueta
     {
         [Key]
