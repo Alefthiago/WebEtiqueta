@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using WebEtiqueta.Controllers;
 using WebEtiqueta.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddEntityFrameworkNpgsql()
     .AddDbContext<Contexto>(opt =>
         opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<AuthController>();
 
 var app = builder.Build();
 

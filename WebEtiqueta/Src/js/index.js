@@ -1,4 +1,5 @@
 ﻿import { startConnection } from './QzTrayConfig.js';
+
 $(document).ready(function () {
     $('.collapse-item').on('click', function () {
         let targetCollapse = $(this).data('target');

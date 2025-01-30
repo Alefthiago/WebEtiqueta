@@ -1,32 +1,25 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebEtiqueta.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace WebEtiqueta.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        // Injeção do ILogger e do AuthController
+        public HomeController(ILogger<HomeController> logger, AuthController authController)
+            : base(authController)  // Passando o AuthController para o construtor da classe BaseController
         {
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

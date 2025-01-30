@@ -10,5 +10,6 @@ namespace WebEtiqueta.Models
         }
 
         public DbSet<Etiqueta> Etiqueta { get; set; }
+        public DbSet<UsuarioModel> Usuario { get; set; }
     }
 }
