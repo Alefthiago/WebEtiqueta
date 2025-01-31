@@ -3,11 +3,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebEtiqueta.Models
 {
-    public class Etiqueta
+    public class EtiquetaModel
     {
+        //      CAMPOS.       //
         [Key]
         [Column("ETIQUETA_ID")]
         public int Id { get; set; }
+
+        [Required]
+        [Column("ETIQUETA_MATRIZ_ID")]
+        public int MatrizId { get; set; }
 
         [Column("ETIQUETA_NOME")]
         [StringLength(50)]
@@ -43,10 +48,10 @@ namespace WebEtiqueta.Models
         [Required]
         public int EspacoY { get; set; }
 
-        [Column("ETIQUETA_IMPRESSORA")]
-        [StringLength(50)]
-        [Required]
-        public string Impressora { get; set; }
+        //[Column("ETIQUETA_IMPRESSORA")]
+        //[StringLength(50)]
+        //[Required]
+        //public string Impressora { get; set; }
 
         [Column("ETIQUETA_ELIMINADO")]
         [Required]
@@ -58,5 +63,21 @@ namespace WebEtiqueta.Models
 
         [Column("ETIQUETA_ELIMINADO_DATA")]
         public DateTime EliminadoData { get; set; }
+
+        [Column("ETIQUETA_CRIADO_POR")]
+        [Required]
+        public int CriadoPor { get; set; }
+
+        [Column("ETIQUETA_CRIADO_DATA")]
+        [Required]
+        public DateTime CriadoData { get; set; }
+
+        //     /CAMPOS.       //
+
+        //      RELACIONAMENTOS.       //
+        public UsuarioModel Criador { get; set; }
+        public MatrizModel Matriz { get; set; }
+        public List<FilialEtiquetaModel> FilialEtiquetas { get; set; }
+        //      RELACIONAMENTOS.       //
     }
 }

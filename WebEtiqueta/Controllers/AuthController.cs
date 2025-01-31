@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -24,6 +25,13 @@ namespace WebEtiqueta.Controllers
             return View("Login");
         }
 
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("AuthToken");
+
+            return RedirectToAction("Login", "Auth");
+        }
+
         [HttpPost]
         public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha)
         {
@@ -34,30 +42,40 @@ namespace WebEtiqueta.Controllers
                     Msg = "Login e Senha são obrigatórios"
                 });
             }
+
+            UsuarioModel? usuario = await DadosLogin(usuarioLogin, usuarioSenha);
+
+            if (usuario == null)
+            {
+                return StatusCode(401, new
+                {
+                    Msg = "Usuário ou senha inválidos"
+                });
+            }
+
+            string jwt = GerarJwtToken(usuario);
+
+            if(string.IsNullOrEmpty(jwt))
+            {
+                return StatusCode(500, new
+                {
+                    Msg = "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte"
+                });
+            }
+
+            // Criando o cookie
+            Response.Cookies.Append("AuthToken", jwt, new CookieOptions
+            {
+                HttpOnly = true,   // Protege contra acesso via JavaScript
+                Secure = false,    // ⚠️ Use `true` em produção (HTTPS)
+                SameSite = SameSiteMode.Lax, // Permite envio em navegação normal
+                Expires = DateTime.UtcNow.AddDays(1) // Tempo de expiração
+            });
+
             return StatusCode(200, new
             {
-                Msg = "ok"
+                Msg = "Usuário autenticado",
             });
-            //var retorno = await VerificarUsuarioLogin(_contexto);
-            //var senhaHash = new PasswordHasher<string>().HashPassword(usuarioLogin, usuarioSenha);
-
-
-            //UsuarioModel usuario = new UsuarioModel(
-            //    usuarioLogin,
-            //    senhaHash
-            //);
-            //return Json(new
-            //{
-            //    StatusCode = 200,
-            //    Message = retorno
-            //});
-            //return StatusCode(401);
-
-            //return Json(new
-            //{
-            //    StatusCode = 200,
-            //    Message = senhaHash
-            //});
         }
 
         public string GerarJwtToken(UsuarioModel usuario)
@@ -86,7 +104,7 @@ namespace WebEtiqueta.Controllers
             }
             catch (Exception ex)
             {
-                return ex.Message;
+                return null;
             }
         }
         public bool ValidarJwtToken(string token)
@@ -111,23 +129,28 @@ namespace WebEtiqueta.Controllers
             }
             catch (Exception ex)
             {
-                return false; // Retorna nulo caso o token seja inválido
+                return false; 
             }
         }
 
-        //private async Task<string>? VerificarUsuarioLogin(Contexto contexto)
-        //{
-        //    // Verificar se o login existe no banco de dados
-        //    var resultado = await contexto.Usuario
-        //        .Where(u => u.Login == this.Login)  // Filtro correto para o login
-        //        .FirstOrDefaultAsync();
+        private async Task<UsuarioModel>? DadosLogin(string login, string senha)
+        {
+            try
+            {
+                var resultado = await _contexto.Usuario
+                    .Where(u => u.Login == login) 
+                    .FirstOrDefaultAsync();
 
-        //    if (resultado != null)
-        //    {
-        //        return resultado.Senha;  // Retorna a senha se o usuário for encontrado
-        //    }
+                if (resultado != null && resultado.VerificarSenhaLogin(senha))
+                {
+                    return resultado;
+                }
 
-        //    return null;  // Caso contrário, retorna null
-        //}
+                return null;
+            } catch (Exception ex)
+            {
+                return null;
+            }
+        }
     }
 }

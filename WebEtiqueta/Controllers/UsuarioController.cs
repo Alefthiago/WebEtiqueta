@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebEtiqueta.Models;
-using WebEtiqueta.Services;
 
 namespace WebEtiqueta.Controllers
 {
