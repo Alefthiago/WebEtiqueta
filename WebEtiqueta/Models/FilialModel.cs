@@ -1,11 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+using WebEtiqueta.Models;
 
 namespace WebEtiqueta.Models
 {
+    [Table("FILIAL")]
     public class FilialModel
     {
-        //      CAMPOS.     //
         [Key]
         [Column("FILIAL_ID")]
         public int Id { get; set; }
@@ -21,14 +22,25 @@ namespace WebEtiqueta.Models
         public string CnpjCpf { get; set; }
 
         [Required]
-        [Column("FILIAL_MATRIZ_ID")]
-        public int MatrizId { get; set; }
-        //     /CAMPOS.     //
+        [Column("FILIAL_ELIMINADO")]
+        public bool Eliminado { get; set; }
+
+        [Column("FILIAL_ELIMINADO_DATA")]
+        public DateTime? EliminadoData { get; set; }
 
         //      RELACIONAMENTOS.     //
+        [Column("FILIAL_ELIMINADO_POR")]
+        public int? EliminadoPor { get; set; }
+        public UsuarioModel? Eliminador { get; set; }
+
+        [Required]
+        [Column("FILIAL_MATRIZ_ID")]
+        public int MatrizId { get; set; }
         public MatrizModel Matriz { get; set; }
-        public List<UsuarioFilialModel> UsuarioFilials { get; set; }
-        public List<EtiquetaModel> Etiquetas { get; set; }
-        //     /RELACIONAMENTOS.     //
+
+        public ICollection<UsuarioFilialModel> Usuarios { get; set; }
+
+        public ICollection<FilialEtiquetaModel> Etiquetas { get; set; }
+        //      /RELACIONAMENTOS.     //
     }
 }

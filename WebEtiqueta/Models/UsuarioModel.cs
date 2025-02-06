@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebEtiqueta.Models
 {
+    [Table("USUARIO")]
     public class UsuarioModel
     {
         //      CAMPOS.     //
@@ -26,23 +27,39 @@ namespace WebEtiqueta.Models
         [Column("USUARIO_SENHA")]
         [StringLength(250)]
         public string Senha { get; set; }
-
-        [Required]
-        [Column("USUARIO_MATRIZ_ID")]
-        public int MatrizId { get; set; }
-
-        [Required]
-        [Column("USUARIO_TIPO")]
-        public int TipoId { get; set; }
         //     /CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
+        [Required]
+        [Column("USUARIO_MATRIZ_ID")]
+        public int MatrizId { get; set; }
         public MatrizModel Matriz { get; set; }
-        public TipoUsuarioModel Tipo { get; set; }
-        public List<UsuarioFilialModel> UsuarioFilials { get; set; }
+
+        [Required]
+        [Column("USUARIO_NIVEL_ACESSO_ID")]
+        public int NivelAcessoId { get; set; }
+        public NivelAcessoModel NivelAcesso { get; set; }
+
+        [Required]
+        [Column("USUARIO_ELIMINADO")]
+        public bool Eliminado { get; set; }
+
+        [Column("USUARIO_ELIMINADO_DATA")]
+        public DateTime? EliminadoData { get; set; }
+
+        [Column("USUARIO_ELIMINADO_POR")]
+        public int? EliminadoPor { get; set; }
+        public UsuarioModel? Eliminador { get; set; }
+
+        public ICollection<UsuarioFilialModel> Filiais { get; set; }
+        public ICollection<EtiquetaModel> EtiquetasEliminadas { get; set; }
+        public ICollection<FilialModel> FiliaisEliminadas { get; set; }
+        public ICollection<UsuarioModel> UsuariosEliminados { get; set; }
         //      RELACIONAMENTOS.     //
 
-
+        public UsuarioModel()
+        {
+        }
         public UsuarioModel(String login, String senha)
         {
             this.Login = login;

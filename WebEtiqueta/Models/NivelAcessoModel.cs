@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebEtiqueta.Models
 {
+    [Table("NIVEL_ACESSO")]
     public class NivelAcessoModel
     {
         //      CAMPOS.     //
@@ -53,7 +54,17 @@ namespace WebEtiqueta.Models
         //      CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
-        public List<TipoUsuarioModel> TipoUsuarios { get; set; }
+        [Required]
+        [Column("NIVEL_ACESSO_ELIMINADO")]
+        public bool Eliminado { get; set; }
+
+        [Column("NIVEL_ACESSO_ELIMINADO_DATA")]
+        public DateTime? EliminadoData { get; set; }
+
+        [Column("NIVEL_ACESSO_ELIMINADO_POR")]
+        public int? EliminadoPor { get; set; }
+        public UsuarioModel? Eliminador { get; set; }
+        public ICollection<UsuarioModel> Usuarios { get; set; }
         //     /RELACIONAMENTOS.     //
 
     }

@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 
 namespace WebEtiqueta.Controllers
@@ -35,6 +36,9 @@ namespace WebEtiqueta.Controllers
         [HttpPost]
         public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha)
         {
+            usuarioLogin = usuarioLogin.Trim().ToLower();
+            usuarioSenha = usuarioSenha.Trim();
+
             if (string.IsNullOrEmpty(usuarioLogin) || string.IsNullOrEmpty(usuarioSenha))
             {
                 return StatusCode(400, new
@@ -43,28 +47,37 @@ namespace WebEtiqueta.Controllers
                 });
             }
 
-            UsuarioModel? usuario = await DadosLogin(usuarioLogin, usuarioSenha);
+            //var hasher = new PasswordHasher<string>();
+            //var senha = hasher.HashPassword(usuarioLogin, usuarioSenha);
+            //return StatusCode(200,
+            //   new
+            //   {
+            //       Msg = senha
+            //   }
+            //);
 
-            if (usuario == null)
+            Resposta<UsuarioModel> usuario = await DadosLogin(usuarioLogin, usuarioSenha);
+
+            if (!usuario.status)
             {
                 return StatusCode(401, new
                 {
-                    Msg = "Usuário ou senha inválidos"
+                    Msg = usuario.mensagem
                 });
             }
 
-            string jwt = GerarJwtToken(usuario);
+            Resposta<String> jwt = GerarJwtToken(usuario.dados);
 
-            if(string.IsNullOrEmpty(jwt))
+            if(!jwt.status)
             {
                 return StatusCode(500, new
                 {
-                    Msg = "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte"
+                    Msg = jwt.mensagem
                 });
             }
 
             // Criando o cookie
-            Response.Cookies.Append("AuthToken", jwt, new CookieOptions
+            Response.Cookies.Append("AuthToken", jwt.dados, new CookieOptions
             {
                 HttpOnly = true,   // Protege contra acesso via JavaScript
                 Secure = false,    // ⚠️ Use `true` em produção (HTTPS)
@@ -74,11 +87,11 @@ namespace WebEtiqueta.Controllers
 
             return StatusCode(200, new
             {
-                Msg = "Usuário autenticado",
+                Msg = "Usuário autenticado com sucesso",
             });
         }
 
-        public string GerarJwtToken(UsuarioModel usuario)
+        public Resposta<String> GerarJwtToken(UsuarioModel usuario)
         {
             try
             {
@@ -99,15 +112,23 @@ namespace WebEtiqueta.Controllers
 
                 var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-                return jwt;
+                return new Resposta<string>(
+                    true,
+                    "Token gerado com sucesso",
+                    jwt
+                );
 
             }
             catch (Exception ex)
             {
-                return null;
+                return new Resposta<string>(
+                    false,
+                    "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte"
+                );
             }
         }
-        public bool ValidarJwtToken(string token)
+
+        public bool ValidarJwtToken(string token) // validado ao realizar qualquer requisição para a aplicação
         {
             try
             {
@@ -133,23 +154,33 @@ namespace WebEtiqueta.Controllers
             }
         }
 
-        private async Task<UsuarioModel>? DadosLogin(string login, string senha)
+        private async Task<Resposta<UsuarioModel>> DadosLogin(string login, string senha)
         {
             try
             {
                 var resultado = await _contexto.Usuario
                     .Where(u => u.Login == login) 
                     .FirstOrDefaultAsync();
-
+                
                 if (resultado != null && resultado.VerificarSenhaLogin(senha))
                 {
-                    return resultado;
+                    return new Resposta<UsuarioModel>(
+                        true,
+                        "Usuário autenticado",
+                        resultado
+                    );
                 }
 
-                return null;
+                return new Resposta<UsuarioModel>(
+                    false,
+                    "Usuário ou senha inválidos!"
+                );
             } catch (Exception ex)
             {
-                return null;
+                return new Resposta<UsuarioModel>(
+                    false,
+                    "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!"
+                );
             }
         }
     }

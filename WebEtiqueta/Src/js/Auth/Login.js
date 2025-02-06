@@ -1,6 +1,12 @@
 ﻿const BASE_URL = window.location.origin;
 
 $(document).ready(function () {
+    $('.trim-input').on('blur', function () {
+        texto = $(this).val();
+        texto = texto.trim();
+        $(this).val(texto);
+    });
+
     $('.close-btn-alert').click(function () {
         $('.card-alert').removeClass('fade-in');
         $('.card-alert').addClass('fade-out');
@@ -12,9 +18,11 @@ $(document).ready(function () {
 
         $('#btnLogin').val('Carregando...').prop('disabled', true);
 
+        let formData = new FormData(this);
+
         fetch(`${BASE_URL}/Auth/ValidarLogin`, {
             method: 'POST',
-            body: new FormData(this)
+            body: formData
         })
             .then(response => {
                 if (!response.ok) {

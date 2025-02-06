@@ -1,6 +1,12 @@
-﻿import { startConnection } from './QzTrayConfig.js';
-
+﻿import { startConnection } from '../helperJs/QzTrayConfig.js';
 $(document).ready(function () {
+    startConnection();
+    $('.trim-input').on('blur', function () {
+        texto = $(this).val();
+        texto = texto.trim();
+        $(this).val(texto);
+    });
+
     $('.collapse-item').on('click', function () {
         let targetCollapse = $(this).data('target');
         $('#collapseTwo .collapse').not(targetCollapse).collapse('hide');
@@ -24,6 +30,4 @@ $(document).ready(function () {
         e.preventDefault();
          startConnection();
     });
-
-    startConnection();
 });

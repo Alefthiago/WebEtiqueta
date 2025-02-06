@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebEtiqueta.Models
 {
+    [Table("MATRIZ")]
     public class MatrizModel
     {
         //      CAMPOS.     //
@@ -22,10 +23,9 @@ namespace WebEtiqueta.Models
         //     /CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
-        public List<UsuarioModel> Usuarios { get; set; }
-        public List<FilialModel> Filiais { get; set; }
-
-        public List<EtiquetaModel> Etiquetas { get; set; }
+        public ICollection<UsuarioModel> Usuarios { get; set; }
+        public ICollection<EtiquetaModel> Etiquetas { get; set; }
+        public ICollection<FilialModel> Filiais { get; set; }
         //      RELACIONAMENTOS.     //
     }
 }

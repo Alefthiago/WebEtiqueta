@@ -47,7 +47,7 @@
                                         </div>
                                         <form class="user" id="formLogin">
                                             <div class="form-group">
-                                                <input type="text" class="form-control form-control-user"
+                                            <input type="text" class="form-control form-control-user trim-input"
                                                    id="usuarioLogin" name="usuarioLogin" aria-describedby="Nome Login"
                                                         placeholder="Usuario"
                                                         required>
@@ -97,7 +97,6 @@
         <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
 
         <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->
-        @await Component.InvokeAsync("Webpack", 1)
         @await Component.InvokeAsync("Webpack", 2)
         @await Component.InvokeAsync("Webpack", 3)
     </body>
