@@ -29,7 +29,6 @@ namespace WebEtiqueta.Controllers
         public IActionResult Logout()
         {
             Response.Cookies.Delete("AuthToken");
-
             return RedirectToAction("Login", "Auth");
         }
 
@@ -97,7 +96,7 @@ namespace WebEtiqueta.Controllers
             {
                 List<Claim> claims = new List<Claim>
                 {
-                    new Claim("IdUsuario", Convert.ToString(usuario.Id)),
+                    new Claim("UsuarioId", Convert.ToString(usuario.Id)),
                     new Claim("MatrizId", Convert.ToString(usuario.MatrizId))
                 };
 
@@ -119,7 +118,7 @@ namespace WebEtiqueta.Controllers
                 );
 
             }
-            catch (Exception ex)
+            catch
             {
                 return new Resposta<string>(
                     false,
@@ -148,7 +147,7 @@ namespace WebEtiqueta.Controllers
                 var principal = tokenHandler.ValidateToken(token, parametrosValidacao, out _);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 return false; 
             }
@@ -175,7 +174,7 @@ namespace WebEtiqueta.Controllers
                     false,
                     "Usuário ou senha inválidos!"
                 );
-            } catch (Exception ex)
+            } catch
             {
                 return new Resposta<UsuarioModel>(
                     false,
