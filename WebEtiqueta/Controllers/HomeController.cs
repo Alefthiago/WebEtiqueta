@@ -9,7 +9,7 @@ namespace WebEtiqueta.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        // Injeção do ILogger e do AuthController
+        // Injeï¿½ï¿½o do ILogger e do AuthController
         public HomeController(ILogger<HomeController> logger, AuthController authController)
             : base(authController)  // Passando o AuthController para o construtor da classe BaseController
         {
@@ -19,6 +19,8 @@ namespace WebEtiqueta.Controllers
         [HttpGet]
         public IActionResult Index()
         {
+            string token = Request.Cookies["AuthToken"];
+
             return View();
         }
     }

@@ -18,7 +18,7 @@ public class BaseController : Controller
         {
             bool usuario = _authController.ValidarJwtToken(token);
 
-            if (usuario != null)
+            if (usuario)
             {
                 //ViewBag.Usuario = usuario.Identity.Name;
                 return;

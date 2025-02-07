@@ -97,8 +97,8 @@ namespace WebEtiqueta.Controllers
             {
                 List<Claim> claims = new List<Claim>
                 {
-                    new Claim("Nome", usuario.Nome),
-                    //new Claim("", usuario.Id.ToString())
+                    new Claim("IdUsuario", Convert.ToString(usuario.Id)),
+                    new Claim("MatrizId", Convert.ToString(usuario.MatrizId))
                 };
 
                 var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config.GetSection("JwtSettings:SecretKey").Value));
