@@ -54,6 +54,10 @@ namespace WebEtiqueta.Models
         //      CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
+        [Column("NIVEL_ACESSO_MATRIZ_ID")]
+        public int MatrizId { get; set; }
+        public MatrizModel Matriz { get; set; }
+
         [Required]
         [Column("NIVEL_ACESSO_ELIMINADO")]
         public bool Eliminado { get; set; }

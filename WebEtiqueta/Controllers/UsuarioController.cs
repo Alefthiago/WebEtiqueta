@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using WebEtiqueta.Models;
 
 namespace WebEtiqueta.Controllers
 {
@@ -9,8 +8,8 @@ namespace WebEtiqueta.Controllers
     {
         private readonly ILogger<UsuarioController> _logger;
 
-        public UsuarioController(ILogger<UsuarioController> logger, AuthController authController)
-            : base(authController)
+        public UsuarioController(ILogger<UsuarioController> logger, IConfiguration configuration)
+            : base(configuration)
         {
             _logger = logger;
         }

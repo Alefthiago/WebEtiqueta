@@ -122,14 +122,20 @@ namespace WebEtiqueta.Migrations
                     NIVEL_ACESSO_ADICIONAR_FILIAR = table.Column<bool>(type: "boolean", nullable: false),
                     NIVEL_ACESSO_EDITAR_FILIAR = table.Column<bool>(type: "boolean", nullable: false),
                     NIVEL_ACESSO_EXCLUIR_FILIAR = table.Column<bool>(type: "boolean", nullable: false),
+                    NIVEL_ACESSO_MATRIZ_ID = table.Column<int>(type: "integer", nullable: false),
                     NIVEL_ACESSO_ELIMINADO = table.Column<bool>(type: "boolean", nullable: false),
                     NIVEL_ACESSO_ELIMINADO_DATA = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    NIVEL_ACESSO_ELIMINADO_POR = table.Column<int>(type: "integer", nullable: true),
-                    EliminadorId = table.Column<int>(type: "integer", nullable: true)
+                    NIVEL_ACESSO_ELIMINADO_POR = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NIVEL_ACESSO", x => x.NIVEL_ACESSO_ID);
+                    table.ForeignKey(
+                        name: "FK_NIVEL_ACESSO_MATRIZ_NIVEL_ACESSO_MATRIZ_ID",
+                        column: x => x.NIVEL_ACESSO_MATRIZ_ID,
+                        principalTable: "MATRIZ",
+                        principalColumn: "MATRIZ_ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -141,9 +147,9 @@ namespace WebEtiqueta.Migrations
                     USUARIO_NOME = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     USUARIO_LOGIN = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     USUARIO_SENHA = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    USUARIO_ELIMINADO = table.Column<bool>(type: "boolean", nullable: false),
                     USUARIO_MATRIZ_ID = table.Column<int>(type: "integer", nullable: false),
                     USUARIO_NIVEL_ACESSO_ID = table.Column<int>(type: "integer", nullable: false),
-                    USUARIO_ELIMINADO = table.Column<bool>(type: "boolean", nullable: false),
                     USUARIO_ELIMINADO_DATA = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     USUARIO_ELIMINADO_POR = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -173,21 +179,21 @@ namespace WebEtiqueta.Migrations
                 name: "USUARIO_FILIAL",
                 columns: table => new
                 {
-                    USUARIO_FILIAL_USUARIO_ID = table.Column<int>(type: "integer", nullable: false),
-                    USUARIO_FILIAL_FILIAL_ID = table.Column<int>(type: "integer", nullable: false)
+                    USUARIO_ID = table.Column<int>(type: "integer", nullable: false),
+                    FILIAL_ID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_USUARIO_FILIAL", x => new { x.USUARIO_FILIAL_USUARIO_ID, x.USUARIO_FILIAL_FILIAL_ID });
+                    table.PrimaryKey("PK_USUARIO_FILIAL", x => new { x.USUARIO_ID, x.FILIAL_ID });
                     table.ForeignKey(
-                        name: "FK_USUARIO_FILIAL_FILIAL_USUARIO_FILIAL_FILIAL_ID",
-                        column: x => x.USUARIO_FILIAL_FILIAL_ID,
+                        name: "FK_USUARIO_FILIAL_FILIAL_FILIAL_ID",
+                        column: x => x.FILIAL_ID,
                         principalTable: "FILIAL",
                         principalColumn: "FILIAL_ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_USUARIO_FILIAL_USUARIO_USUARIO_FILIAL_USUARIO_ID",
-                        column: x => x.USUARIO_FILIAL_USUARIO_ID,
+                        name: "FK_USUARIO_FILIAL_USUARIO_USUARIO_ID",
+                        column: x => x.USUARIO_ID,
                         principalTable: "USUARIO",
                         principalColumn: "USUARIO_ID",
                         onDelete: ReferentialAction.Cascade);
@@ -200,8 +206,8 @@ namespace WebEtiqueta.Migrations
 
             migrationBuilder.InsertData(
                 table: "NIVEL_ACESSO",
-                columns: new[] { "NIVEL_ACESSO_ID", "NIVEL_ACESSO_ADICIONAR_ETIQUETA", "NIVEL_ACESSO_ADICIONAR_FILIAR", "NIVEL_ACESSO_ADICIONAR_USUARIO", "NIVEL_ACESSO_EDITAR_ETIQUETA", "NIVEL_ACESSO_EDITAR_FILIAR", "NIVEL_ACESSO_EDITAR_USUARIO", "NIVEL_ACESSO_ELIMINADO", "NIVEL_ACESSO_ELIMINADO_DATA", "NIVEL_ACESSO_ELIMINADO_POR", "EliminadorId", "NIVEL_ACESSO_EXCLUIR_ETIQUETA", "NIVEL_ACESSO_EXCLUIR_FILIAR", "NIVEL_ACESSO_EXCLUIR_USUARIO", "NIVEL_ACESSO_NOME" },
-                values: new object[] { 1, true, true, true, true, true, true, false, null, null, null, true, true, true, "Administrador" });
+                columns: new[] { "NIVEL_ACESSO_ID", "NIVEL_ACESSO_ADICIONAR_ETIQUETA", "NIVEL_ACESSO_ADICIONAR_FILIAR", "NIVEL_ACESSO_ADICIONAR_USUARIO", "NIVEL_ACESSO_EDITAR_ETIQUETA", "NIVEL_ACESSO_EDITAR_FILIAR", "NIVEL_ACESSO_EDITAR_USUARIO", "NIVEL_ACESSO_ELIMINADO", "NIVEL_ACESSO_ELIMINADO_DATA", "NIVEL_ACESSO_ELIMINADO_POR", "NIVEL_ACESSO_EXCLUIR_ETIQUETA", "NIVEL_ACESSO_EXCLUIR_FILIAR", "NIVEL_ACESSO_EXCLUIR_USUARIO", "NIVEL_ACESSO_MATRIZ_ID", "NIVEL_ACESSO_NOME" },
+                values: new object[] { 1, true, true, true, true, true, true, false, null, null, true, true, true, 1, "Administrador" });
 
             migrationBuilder.InsertData(
                 table: "USUARIO",
@@ -234,9 +240,14 @@ namespace WebEtiqueta.Migrations
                 column: "ETIQUETA_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NIVEL_ACESSO_EliminadorId",
+                name: "IX_NIVEL_ACESSO_NIVEL_ACESSO_ELIMINADO_POR",
                 table: "NIVEL_ACESSO",
-                column: "EliminadorId");
+                column: "NIVEL_ACESSO_ELIMINADO_POR");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NIVEL_ACESSO_NIVEL_ACESSO_MATRIZ_ID",
+                table: "NIVEL_ACESSO",
+                column: "NIVEL_ACESSO_MATRIZ_ID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_USUARIO_USUARIO_ELIMINADO_POR",
@@ -254,9 +265,9 @@ namespace WebEtiqueta.Migrations
                 column: "USUARIO_NIVEL_ACESSO_ID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_USUARIO_FILIAL_USUARIO_FILIAL_FILIAL_ID",
+                name: "IX_USUARIO_FILIAL_FILIAL_ID",
                 table: "USUARIO_FILIAL",
-                column: "USUARIO_FILIAL_FILIAL_ID");
+                column: "FILIAL_ID");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ETIQUETA_USUARIO_ETIQUETA_ELIMINADO_POR",
@@ -273,9 +284,9 @@ namespace WebEtiqueta.Migrations
                 principalColumn: "USUARIO_ID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_NIVEL_ACESSO_USUARIO_EliminadorId",
+                name: "FK_NIVEL_ACESSO_USUARIO_NIVEL_ACESSO_ELIMINADO_POR",
                 table: "NIVEL_ACESSO",
-                column: "EliminadorId",
+                column: "NIVEL_ACESSO_ELIMINADO_POR",
                 principalTable: "USUARIO",
                 principalColumn: "USUARIO_ID");
         }
@@ -284,11 +295,15 @@ namespace WebEtiqueta.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
+                name: "FK_NIVEL_ACESSO_MATRIZ_NIVEL_ACESSO_MATRIZ_ID",
+                table: "NIVEL_ACESSO");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_USUARIO_MATRIZ_USUARIO_MATRIZ_ID",
                 table: "USUARIO");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_NIVEL_ACESSO_USUARIO_EliminadorId",
+                name: "FK_NIVEL_ACESSO_USUARIO_NIVEL_ACESSO_ELIMINADO_POR",
                 table: "NIVEL_ACESSO");
 
             migrationBuilder.DropTable(

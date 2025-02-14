@@ -1,31 +1,40 @@
 using Microsoft.AspNetCore.Mvc;
 using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
+using WebEtiqueta.Services;
+
 namespace WebEtiqueta.Controllers
 {
     public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly AuthController _authController;
+        private readonly HomeService _homeService;
 
-        // Inje��o do ILogger e do AuthController
-        public HomeController(ILogger<HomeController> logger, AuthController authController)
-            : base(authController)  // Passando o AuthController para o construtor da classe BaseController
+        public HomeController(
+            ILogger<HomeController> logger, 
+            IConfiguration configuration,
+            HomeService homeService
+        )
+            : base(configuration)
         {
-            _logger = logger;
-            _authController = authController;
+            _logger         = logger;
+            _homeService    = homeService;
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> IndexAsync()
         {
-            if(Request.Cookies["AuthToken"] == null)
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
-            Dictionary<string, string> dadosToken = Helpers.Jwt.DadosToken(Request.Cookies["AuthToken"]); // ["UsuarioId"] ["MatriId"]
-
+            //var dadosToken = (Dictionary<string, string>)HttpContext.Items["DadosToken"];
+            //if(!etiquetas.status)
+            //{
+            //    TempData["AlertaTipo"]          = "danger";
+            //    TempData["AlertaMensagem"]      = etiquetas.mensagem;
+            //    TempData["AlertaLogSuporte"]    = etiquetas.logSuporte;
+            //} else
+            //{
+            //    ViewBag.Etiquetas = etiquetas.dados;
+            //}
+           
             return View();
         }
     }

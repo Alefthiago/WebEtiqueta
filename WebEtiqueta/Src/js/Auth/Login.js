@@ -2,9 +2,8 @@
 
 $(document).ready(function () {
     $('.trim-input').on('blur', function () {
-        texto = $(this).val();
-        texto = texto.trim();
-        $(this).val(texto);
+        let text = $(this).val();
+        $(this).val(text.trim());
     });
 
     $('.close-btn-alert').click(function () {

@@ -1,24 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
+using WebEtiqueta.Services;
 
 namespace WebEtiqueta.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly IConfiguration _config;
-        private readonly Contexto _contexto;
+        private readonly AuthService _authService;
 
-        public AuthController(IConfiguration config, Contexto contexto)
+        public AuthController(AuthService authService)
         {
-            _config = config;
-            _contexto = contexto;
+            _authService = authService;
         }
 
         public IActionResult Login()
@@ -29,6 +22,7 @@ namespace WebEtiqueta.Controllers
         public IActionResult Logout()
         {
             Response.Cookies.Delete("AuthToken");
+            HttpContext.Session.Clear();
             return RedirectToAction("Login", "Auth");
         }
 
@@ -46,16 +40,7 @@ namespace WebEtiqueta.Controllers
                 });
             }
 
-            //var hasher = new PasswordHasher<string>();
-            //var senha = hasher.HashPassword(usuarioLogin, usuarioSenha);
-            //return StatusCode(200,
-            //   new
-            //   {
-            //       Msg = senha
-            //   }
-            //);
-
-            Resposta<UsuarioModel> usuario = await DadosLogin(usuarioLogin, usuarioSenha);
+            Resposta<UsuarioModel> usuario = await _authService.ValidarLogin(usuarioLogin, usuarioSenha);
 
             if (!usuario.status)
             {
@@ -65,7 +50,7 @@ namespace WebEtiqueta.Controllers
                 });
             }
 
-            Resposta<String> jwt = GerarJwtToken(usuario.dados);
+            Resposta<String> jwt = _authService.GerarJwtToken(usuario.dados);
 
             if(!jwt.status)
             {
@@ -78,109 +63,19 @@ namespace WebEtiqueta.Controllers
             // Criando o cookie
             Response.Cookies.Append("AuthToken", jwt.dados, new CookieOptions
             {
-                HttpOnly = true,   // Protege contra acesso via JavaScript
-                Secure = false,    // ⚠️ Use `true` em produção (HTTPS)
-                SameSite = SameSiteMode.Lax, // Permite envio em navegação normal
-                Expires = DateTime.UtcNow.AddDays(1) // Tempo de expiração
+                HttpOnly    = true,   // Protege contra acesso via JavaScript
+                Secure      = false,    // ⚠️ Use `true` em produção (HTTPS)
+                SameSite    = SameSiteMode.Lax, // Permite envio em navegação normal
+                Expires     = DateTime.UtcNow.AddDays(1) // Tempo de expiração
             });
+
+            HttpContext.Session.SetString("UsuarioNome", usuario.dados.Nome);
+            HttpContext.Session.SetInt32("UsuarioId", usuario.dados.Id);
 
             return StatusCode(200, new
             {
                 Msg = "Usuário autenticado com sucesso",
             });
-        }
-
-        public Resposta<String> GerarJwtToken(UsuarioModel usuario)
-        {
-            try
-            {
-                List<Claim> claims = new List<Claim>
-                {
-                    new Claim("UsuarioId", Convert.ToString(usuario.Id)),
-                    new Claim("MatrizId", Convert.ToString(usuario.MatrizId))
-                };
-
-                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config.GetSection("JwtSettings:SecretKey").Value));
-                var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: cred
-                );
-
-                var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-                return new Resposta<string>(
-                    true,
-                    "Token gerado com sucesso",
-                    jwt
-                );
-
-            }
-            catch
-            {
-                return new Resposta<string>(
-                    false,
-                    "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte"
-                );
-            }
-        }
-
-        public bool ValidarJwtToken(string token) // validado ao realizar qualquer requisição para a aplicação
-        {
-            try
-            {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(_config["JwtSettings:SecretKey"]);
-
-                var parametrosValidacao = new TokenValidationParameters
-                {
-                    ValidateIssuer = false, // Defina como true se quiser validar o emissor
-                    ValidateAudience = false, // Defina como true se quiser validar a audiência
-                    ValidateLifetime = true, // Verifica se o token expirou
-                    ValidateIssuerSigningKey = true, // Verifica a assinatura
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ClockSkew = TimeSpan.Zero // Evita que o token continue válido por um pequeno período após a expiração
-                };
-
-                var principal = tokenHandler.ValidateToken(token, parametrosValidacao, out _);
-                return true;
-            }
-            catch
-            {
-                return false; 
-            }
-        }
-
-        private async Task<Resposta<UsuarioModel>> DadosLogin(string login, string senha)
-        {
-            try
-            {
-                var resultado = await _contexto.Usuario
-                    .Where(u => u.Login == login) 
-                    .FirstOrDefaultAsync();
-                
-                if (resultado != null && resultado.VerificarSenhaLogin(senha))
-                {
-                    return new Resposta<UsuarioModel>(
-                        true,
-                        "Usuário autenticado",
-                        resultado
-                    );
-                }
-
-                return new Resposta<UsuarioModel>(
-                    false,
-                    "Usuário ou senha inválidos!"
-                );
-            } catch
-            {
-                return new Resposta<UsuarioModel>(
-                    false,
-                    "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!"
-                );
-            }
         }
     }
 }

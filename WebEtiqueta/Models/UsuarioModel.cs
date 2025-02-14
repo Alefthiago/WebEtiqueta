@@ -27,6 +27,10 @@ namespace WebEtiqueta.Models
         [Column("USUARIO_SENHA")]
         [StringLength(250)]
         public string Senha { get; set; }
+
+        [Required]
+        [Column("USUARIO_ELIMINADO")]
+        public bool Eliminado { get; set; }
         //     /CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
@@ -40,10 +44,6 @@ namespace WebEtiqueta.Models
         public int NivelAcessoId { get; set; }
         public NivelAcessoModel NivelAcesso { get; set; }
 
-        [Required]
-        [Column("USUARIO_ELIMINADO")]
-        public bool Eliminado { get; set; }
-
         [Column("USUARIO_ELIMINADO_DATA")]
         public DateTime? EliminadoData { get; set; }
 
@@ -55,6 +55,7 @@ namespace WebEtiqueta.Models
         public ICollection<EtiquetaModel> EtiquetasEliminadas { get; set; }
         public ICollection<FilialModel> FiliaisEliminadas { get; set; }
         public ICollection<UsuarioModel> UsuariosEliminados { get; set; }
+        public ICollection<NivelAcessoModel> NiveisAcessoEliminados { get; set; }
         //      RELACIONAMENTOS.     //
 
         public UsuarioModel()

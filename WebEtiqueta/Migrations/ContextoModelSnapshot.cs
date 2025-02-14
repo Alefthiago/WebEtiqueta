@@ -244,9 +244,6 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("NIVEL_ACESSO_ELIMINADO_POR");
 
-                    b.Property<int?>("EliminadorId")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("ExcluirEtiqueta")
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_EXCLUIR_ETIQUETA");
@@ -259,6 +256,10 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_EXCLUIR_USUARIO");
 
+                    b.Property<int>("MatrizId")
+                        .HasColumnType("integer")
+                        .HasColumnName("NIVEL_ACESSO_MATRIZ_ID");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -267,7 +268,9 @@ namespace WebEtiqueta.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EliminadorId");
+                    b.HasIndex("EliminadoPor");
+
+                    b.HasIndex("MatrizId");
 
                     b.ToTable("NIVEL_ACESSO");
 
@@ -285,6 +288,7 @@ namespace WebEtiqueta.Migrations
                             ExcluirEtiqueta = true,
                             ExcluirFilial = true,
                             ExcluirUsuario = true,
+                            MatrizId = 1,
                             Nome = "Administrador"
                         });
                 });
@@ -293,11 +297,11 @@ namespace WebEtiqueta.Migrations
                 {
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
-                        .HasColumnName("USUARIO_FILIAL_USUARIO_ID");
+                        .HasColumnName("USUARIO_ID");
 
                     b.Property<int>("FilialId")
                         .HasColumnType("integer")
-                        .HasColumnName("USUARIO_FILIAL_FILIAL_ID");
+                        .HasColumnName("FILIAL_ID");
 
                     b.HasKey("UsuarioId", "FilialId");
 
@@ -432,10 +436,18 @@ namespace WebEtiqueta.Migrations
             modelBuilder.Entity("WebEtiqueta.Models.NivelAcessoModel", b =>
                 {
                     b.HasOne("WebEtiqueta.Models.UsuarioModel", "Eliminador")
-                        .WithMany()
-                        .HasForeignKey("EliminadorId");
+                        .WithMany("NiveisAcessoEliminados")
+                        .HasForeignKey("EliminadoPor");
+
+                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
+                        .WithMany("NiveisAcesso")
+                        .HasForeignKey("MatrizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Eliminador");
+
+                    b.Navigation("Matriz");
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.UsuarioFilialModel", b =>
@@ -500,6 +512,8 @@ namespace WebEtiqueta.Migrations
 
                     b.Navigation("Filiais");
 
+                    b.Navigation("NiveisAcesso");
+
                     b.Navigation("Usuarios");
                 });
 
@@ -515,6 +529,8 @@ namespace WebEtiqueta.Migrations
                     b.Navigation("Filiais");
 
                     b.Navigation("FiliaisEliminadas");
+
+                    b.Navigation("NiveisAcessoEliminados");
 
                     b.Navigation("UsuariosEliminados");
                 });

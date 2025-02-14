@@ -26,6 +26,7 @@ namespace WebEtiqueta.Models
         public ICollection<UsuarioModel> Usuarios { get; set; }
         public ICollection<EtiquetaModel> Etiquetas { get; set; }
         public ICollection<FilialModel> Filiais { get; set; }
+        public ICollection<NivelAcessoModel> NiveisAcesso { get; set; }
         //      RELACIONAMENTOS.     //
     }
 }
