@@ -3,19 +3,52 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
+using WebEtiqueta.Repositorys;
 
 namespace WebEtiqueta.Services
 {
     public class AuthService
     {
-        private readonly Contexto _contexto;
         private readonly IConfiguration _config;
-        public AuthService(Contexto contexto, IConfiguration config)
+        private readonly AuthRepository _authRepoistory;
+        public AuthService(IConfiguration config, AuthRepository authRepository)
         {
-            _contexto = contexto;
             _config = config;
+            _authRepoistory = authRepository;
+        }
+
+        public async Task<Resposta<MatrizModel>> PegarMatriz(string documento)
+        {
+            try
+            {
+                if (!Regex.IsMatch(documento, @"^\d+$"))
+                {
+                    return new Resposta<MatrizModel>(
+                        status: false,
+                        mensagem: "CNPJ/CPF inválido, digite apenas números"
+                    );
+                }
+
+                Resposta<MatrizModel> consulta = await _authRepoistory.PegarMatrizPorCnpjCpf(documento);
+                
+                return new Resposta<MatrizModel>(
+                    status: consulta.status,
+                    mensagem: consulta.mensagem,
+                    dados: consulta.dados,
+                    logSuporte: consulta.logSuporte
+                );
+            }
+            catch (Exception e)
+            {
+                return new Resposta<MatrizModel>(
+                    status: false,
+                    mensagem: "Erro inesperado ao buscar matriz, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    logSuporte: e.Message
+                );
+            }
         }
 
         public Resposta<String> GerarJwtToken(UsuarioModel usuario)
@@ -40,17 +73,18 @@ namespace WebEtiqueta.Services
                 var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
                 return new Resposta<string>(
-                    true,
-                    "Token gerado com sucesso",
-                    jwt
+                    status: true,
+                    mensagem: "Token gerado com sucesso",
+                    dados: jwt
                 );
 
             }
-            catch
+            catch (Exception e)
             {
                 return new Resposta<string>(
-                    false,
-                    "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte"
+                    status: false,
+                    mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    logSuporte: e.Message
                 );
             }
         }
@@ -59,29 +93,27 @@ namespace WebEtiqueta.Services
         {
             try
             {
-                var resultado = await _contexto.Usuario
-                    .Where(u => u.Login == login)
-                    .FirstOrDefaultAsync();
-
-                if (resultado != null && resultado.VerificarSenhaLogin(senha))
-                {
+                Resposta<UsuarioModel> consulta = await _authRepoistory.ValidarLogin(login, senha);
+                if (!consulta.status)
+                { 
                     return new Resposta<UsuarioModel>(
-                        true,
-                        "Usuário autenticado",
-                        resultado
+                        status: false,
+                        mensagem: "Usuário ou senha inválidos!"
                     );
                 }
 
                 return new Resposta<UsuarioModel>(
-                    false,
-                    "Usuário ou senha inválidos!"
+                    status: true,
+                    mensagem: "Usuário autenticado",
+                    dados: consulta.dados
                 );
             }
-            catch
+            catch (Exception e)
             {
                 return new Resposta<UsuarioModel>(
-                    false,
-                    "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!"
+                    status: false,
+                    mensagem: "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!",
+                    logSuporte: e.Message
                 );
             }
         }

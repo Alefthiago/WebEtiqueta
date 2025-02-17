@@ -13,6 +13,7 @@ builder.Services.AddScoped<HomeService>();
 builder.Services.AddScoped<EtiquetaService>();
 
 builder.Services.AddScoped<EtiquetaRepository>();
+builder.Services.AddScoped<AuthRepository>();
 
 builder.Services.AddDistributedMemoryCache();
 

@@ -11,7 +11,11 @@ $(document).ready(function () {
             "info": "",
         },
         "pageLength": 10,
-        "lengthChange": false
+        "lengthChange": false,
+        ajax: {
+            url: "/Home/GetEtiquetas",
+            dataSrc: ''
+        },
     });
     loadTabela("tabelaEtiquetasGeral");
 });

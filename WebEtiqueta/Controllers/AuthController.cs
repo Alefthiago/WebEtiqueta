@@ -14,8 +14,22 @@ namespace WebEtiqueta.Controllers
             _authService = authService;
         }
 
-        public IActionResult Login()
+        [HttpGet]
+        public async Task<IActionResult> Login(string id)
         {
+
+            if(id != null && !string.IsNullOrEmpty(id.Trim()))
+            {
+                Resposta<MatrizModel> matriz = await _authService.PegarMatriz(id);
+            
+                TempData["AlertaTipo"]      = matriz.status ? "success" : "danger";
+                TempData["AlertaMensagem"]  = matriz.mensagem;
+                TempData["LogSuporte"]      = matriz.logSuporte;
+
+                if (matriz.status)
+                    ViewBag.Matriz = matriz.dados;
+            }
+
             return View("Login");
         }
 
@@ -31,32 +45,36 @@ namespace WebEtiqueta.Controllers
         {
             usuarioLogin = usuarioLogin.Trim().ToLower();
             usuarioSenha = usuarioSenha.Trim();
-
             if (string.IsNullOrEmpty(usuarioLogin) || string.IsNullOrEmpty(usuarioSenha))
             {
                 return StatusCode(400, new
                 {
-                    Msg = "Login e Senha são obrigatórios"
+                    Status      = false,
+                    Mensagem    = "Login e Senha são obrigatórios"
                 });
             }
 
             Resposta<UsuarioModel> usuario = await _authService.ValidarLogin(usuarioLogin, usuarioSenha);
-
             if (!usuario.status)
             {
                 return StatusCode(401, new
                 {
-                    Msg = usuario.mensagem
+                    Status      = usuario.status,
+                    Mensagem    = usuario.mensagem,
+                    LogSuporte  = usuario.logSuporte
                 });
             }
 
+            //MatrizModel matriz = usuario.dados.Matriz;
+            
             Resposta<String> jwt = _authService.GerarJwtToken(usuario.dados);
-
             if(!jwt.status)
             {
                 return StatusCode(500, new
                 {
-                    Msg = jwt.mensagem
+                    Status      = jwt.status,
+                    Mensagem    = jwt.mensagem,
+                    LogSuporte  = jwt.logSuporte
                 });
             }
 
@@ -71,10 +89,12 @@ namespace WebEtiqueta.Controllers
 
             HttpContext.Session.SetString("UsuarioNome", usuario.dados.Nome);
             HttpContext.Session.SetInt32("UsuarioId", usuario.dados.Id);
+            //HttpContext.Session.SetInt32("MatrizCnpjCpf", usuario.dados.MatrizId);
 
             return StatusCode(200, new
             {
-                Msg = "Usuário autenticado com sucesso",
+                Status      = true,
+                Mensagem    = "Usuário autenticado com sucesso",
             });
         }
     }

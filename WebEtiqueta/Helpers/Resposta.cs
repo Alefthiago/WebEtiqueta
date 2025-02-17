@@ -14,5 +14,9 @@
             this.dados = dados;
             this.logSuporte = logSuporte;
         }
+
+        public Resposta()
+        {
+        }
     }
 }

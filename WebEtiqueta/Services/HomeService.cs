@@ -17,20 +17,20 @@ namespace WebEtiqueta.Services
         {
             try
             {
-                var etiquetas = await _etiquetaRepository.ListarEtiquetas(dados);
-                if(etiquetas.status)
+                var consulta = await _etiquetaRepository.ListarEtiquetas(dados);
+                if(consulta.status)
                 {
                     return new Resposta<List<EtiquetaModel>>(
                         status: true,
                         mensagem: "Etiquetas listadas com sucesso",
-                        dados: etiquetas.dados
+                        dados: consulta.dados
                     );
                 } else
                 {
                     return new Resposta<List<EtiquetaModel>>(
                         status: false,
-                        mensagem: etiquetas.mensagem,
-                        logSuporte: etiquetas.logSuporte
+                        mensagem: consulta.mensagem,
+                        logSuporte: consulta.logSuporte
                     );
                 }
             } catch (Exception e)

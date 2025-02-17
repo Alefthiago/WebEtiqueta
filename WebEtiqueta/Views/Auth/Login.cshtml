@@ -26,12 +26,16 @@
             <div class="row justify-content-center">
                 <div class="col-lg-5 mt-5">
 
-                <div class="card card-alert mb-4 py-3 border-bottom-danger position-relative" style="opacity: 0;">
-                    <button type="button" class="close-btn close-btn-alert">×</button>
-                    <div class="card-body">
-                        <p class="m-0 font-weight-bold text-danger" id="text-alert"></p>
+                    <div id="alertaPage" class="alert alert-alertaTipo bg-alertaTipo card-alert text-white shadow d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
+                        <div>
+                            <span id="alertaPageTexto">
+                            </span>
+                            <i id="logSuporte" data-uId="@(Context.Session.GetInt32("UsuarioId"))" href="#" class="fas fa-info-circle" data-toggle="modal" data-target="#logSuporteModal"></i>
+                        </div>
+                        <button id="close-btn-alerta" type="button" class="btn btn-light btn-circle">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                </div>
                     
                     <div class="card o-hidden border-0 shadow-lg my-5">
                         <div class="card-body p-0">
@@ -44,6 +48,10 @@
                                     <div class="p-5">
                                         <div class="text-center">
                                             <h1 class="h4 text-gray-900 mb-4">Web Etiqueta</h1>
+                                            @if (ViewBag.Matriz != null)
+                                            {
+                                                <p>@ViewBag.Matriz.Nome</p>
+                                            }
                                         </div>
                                         <form class="user" id="formLogin">
                                             <div class="form-group">
@@ -95,7 +103,36 @@
 
         <!-- Core plugin JavaScript-->
         <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
+        <script>
+             function alertaPage(tipo, msg, logSuporte)
+            {
+                $alertaPage.css("opacity", 1);
+                tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
+                tipo == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
+                tipo == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
+                tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
 
+                $("#alertaPageTexto").text(msg);
+                $("#logSuporte").data("uid") == 1 && logSuporte != null ? $("#logSuporte").show() : $("#logSuporte").hide();
+            }
+
+             $(document).ready(function () {
+                $alertaPage = $("#alertaPage");
+                $btnClose = $("#close-btn-alerta");
+
+                $btnClose.click(function () {
+                    $alertaPage.css("opacity", 0);
+                });
+
+                var alertaMensagem = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
+                var alertaTipo = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
+                var logSuporte = @Html.Raw(Json.Serialize(TempData["AlertaLogSuporte"]) ?? ViewBag.AlertaLogSuporte ?? null);
+
+                if (alertaTipo != null) {
+                    alertaPage(alertaTipo, alertaMensagem, logSuporte);
+                }
+            });
+        </script>
         <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->
         @await Component.InvokeAsync("Webpack", 2)
         @await Component.InvokeAsync("Webpack", 3)
