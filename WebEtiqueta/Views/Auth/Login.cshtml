@@ -30,7 +30,7 @@
                         <div>
                             <span id="alertaPageTexto">
                             </span>
-                            <i id="logSuporte" data-uId="@(Context.Session.GetInt32("UsuarioId"))" href="#" class="fas fa-info-circle" data-toggle="modal" data-target="#logSuporteModal"></i>
+                            <i id="logSuporte" href="#" class="fas fa-info-circle"></i>
                         </div>
                         <button id="close-btn-alerta" type="button" class="btn btn-light btn-circle">
                             <i class="fas fa-times"></i>
@@ -54,14 +54,24 @@
                                             }
                                         </div>
                                         <form class="user" id="formLogin">
+                                            @if(ViewBag.Matriz == null)
+                                            {
+                                                <div class="form-group">
+                                                    <input type="text" class="form-control form-control-user trim-input"
+                                                            id="matrizDocumento" name="matrizDocumento" placeholder="CNPJ/CPF"
+                                                            required>
+                                                </div>
+                                            }
+
                                             <div class="form-group">
-                                            <input type="text" class="form-control form-control-user trim-input"
+                                                <input type="text" class="form-control form-control-user trim-input"
                                                    id="usuarioLogin" name="usuarioLogin" aria-describedby="Nome Login"
                                                         placeholder="Usuario"
                                                         required>
                                             </div>
+                                            
                                             <div class="form-group">
-                                            <input type="password" class="form-control form-control-user trim-input"
+                                                <input type="password" class="form-control form-control-user trim-input"
                                                    id="usuarioSenha" name="usuarioSenha" placeholder="Senha"
                                                         required>
                                             </div>
@@ -95,6 +105,58 @@
                 </div>
             </div>
         </div>
+
+
+        <div class="modal fade" id="logSuporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Log da Requisição</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="logSuporteTexto"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="senhaSuporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Suporte</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <form id="formSuporte">
+                    <div if="alertaFormSuporte" class="alert alert-danger" role="alert" style="border-radius: 0px; opacity: 0">
+                            <p id="formSuporteAlerta"></p>
+                        </div>
+
+                        <div class="modal-body">
+                                <div class="form-group">
+                                    <input type="password" class="form-control form-control-user trim-input"
+                                       id="suporteSenha" name="suporteSenha" placeholder="Senha"
+                                           required>
+                                </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input id="btnSuporteSenha" type="submit" class="btn btn-primary btn-user btn-block" value="Confirmar">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <script src="~/js/sweetalert2.all.min.js"></script>
 
         <!-- Bootstrap core JavaScript-->
@@ -104,7 +166,9 @@
         <!-- Core plugin JavaScript-->
         <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
         <script>
-             function alertaPage(tipo, msg, logSuporte)
+            const BASE_URL = window.location.origin;
+
+            function alertaPage(tipo, msg, logSuporte = null)
             {
                 $alertaPage.css("opacity", 1);
                 tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
@@ -113,24 +177,74 @@
                 tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
 
                 $("#alertaPageTexto").text(msg);
-                $("#logSuporte").data("uid") == 1 && logSuporte != null ? $("#logSuporte").show() : $("#logSuporte").hide();
+                logSuporte != null ? $("#logSuporte").show() : $("#logSuporte").hide();
+                $("#logSuporteTexto").text(logSuporte);
+            }
+
+            function alertaFormSuporte(msg, logSuporte = null) 
+            {
+                
             }
 
              $(document).ready(function () {
                 $alertaPage = $("#alertaPage");
-                $btnClose = $("#close-btn-alerta");
+                $btnClose   = $("#close-btn-alerta");
+
+                $alertaFormSuporte = $("#alertaFormSuporte");
 
                 $btnClose.click(function () {
                     $alertaPage.css("opacity", 0);
                 });
 
-                var alertaMensagem = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
-                var alertaTipo = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
-                var logSuporte = @Html.Raw(Json.Serialize(TempData["AlertaLogSuporte"]) ?? ViewBag.AlertaLogSuporte ?? null);
+                var alertaMensagem  = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
+                var alertaTipo      = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
+                var logSuporte      = @Html.Raw(Json.Serialize(TempData["LogSuporte"]) ?? ViewBag.LogSuporte ?? null);
 
                 if (alertaTipo != null) {
+                    console.log(logSuporte);
                     alertaPage(alertaTipo, alertaMensagem, logSuporte);
                 }
+
+                 $("#logSuporte").click(function () { 
+                     $("#senhaSuporteModal").modal("show");
+                 });
+
+                 $("#formSuporte").submit(async function (e) {
+                     e.preventDefault();
+                     $("#btnSuporteSenha").val("Carregando...").prop("disabled", true);
+                     let formData = new FormData(this);
+
+                     try {
+                        const requisicao = await fetch(`${BASE_URL}/Auth/SenhaSuporte/`, {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        if (!requisicao.ok) {
+                            const contentType = requisicao.headers.get("content-type");
+                            if (contentType && contentType.includes("application/json")) {
+                                const erro = await requisicao.json();
+                                console.erro("Erro: ", erro);
+                                alertaPage("danger", erro.mensagem, erro.logSuporte);
+                            } else {
+                                const erro = await requisicao.text();
+                                console.erro("Erro: ", erro);
+                                alertaPage("danger", "Erro inesperado, tente novamente mais tarde ou entre em contato com o suporte");
+                            }
+                            return;
+                        }
+
+                        $("#senhaSuporteModal").modal("hide");
+                        $("logSuporteModal").modal("show");
+                     } catch (error) 
+                     {
+                         console.error("Erro: ", error);
+                         alertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
+                     } finally 
+                     { 
+                         $("#btnSuporteSenha").val("Confirmar").prop("disabled", false);
+                     }
+                 });
             });
         </script>
         <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->

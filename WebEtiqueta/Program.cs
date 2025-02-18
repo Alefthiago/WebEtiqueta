@@ -5,6 +5,11 @@ using WebEtiqueta.Repositorys;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
+{
+    options.SerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+});
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

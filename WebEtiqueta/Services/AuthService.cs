@@ -20,17 +20,17 @@ namespace WebEtiqueta.Services
             _authRepoistory = authRepository;
         }
 
-        public async Task<Resposta<MatrizModel>> PegarMatriz(string documento)
+        public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string documento)
         {
             try
             {
-                if (!Regex.IsMatch(documento, @"^\d+$"))
-                {
-                    return new Resposta<MatrizModel>(
-                        status: false,
-                        mensagem: "CNPJ/CPF inválido, digite apenas números"
-                    );
-                }
+                //if (!Regex.IsMatch(documento, @"^\d+$"))
+                //{
+                //    return new Resposta<MatrizModel>(
+                //        status: false,
+                //        mensagem: "CNPJ/CPF inválido, digite apenas números"
+                //    );
+                //}
 
                 Resposta<MatrizModel> consulta = await _authRepoistory.PegarMatrizPorCnpjCpf(documento);
                 
@@ -46,7 +46,7 @@ namespace WebEtiqueta.Services
                 return new Resposta<MatrizModel>(
                     status: false,
                     mensagem: "Erro inesperado ao buscar matriz, tente novamente mais tarde ou entre em contato com nosso suporte",
-                    logSuporte: e.Message
+                    logSuporte: $"AuthService/PegarMatriz: {e.Message}"
                 );
             }
         }

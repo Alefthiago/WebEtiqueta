@@ -12,40 +12,42 @@ $(document).ready(function () {
         //$('#text-alert').text(null);
     });
 
-    $('#formLogin').submit(function (e) {
+    $('#formLogin').submit(async function (e) {
         e.preventDefault();
-
         $('#btnLogin').val('Carregando...').prop('disabled', true);
-
         let formData = new FormData(this);
 
-        fetch(`${BASE_URL}/Auth/ValidarLogin`, {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.msg || 'Ocorreu um erro inesperado tente novamente mais tarde!');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                window.location.href = `${BASE_URL}`;
-            })
-            .catch(error => {
-                if ($('.card-alert').hasClass('fade-out')) {
-                    $('.card-alert').removeClass('fade-out')
-                }
-                if (!$('.card-alert').hasClass('fade-in')) {
-                    $('.card-alert').addClass('fade-in');
-                }
-                $('#text-alert').text(error.message);
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                $('#btnLogin').val('Entrar').prop('disabled', false);
+        try
+        {
+            const requisicao = await fetch(`${BASE_URL}/Auth/ValidarLogin`, {
+                method: "POST",
+                body: formData
             });
+
+            if (!requisicao.ok)
+            {
+                const contentType = requisicao.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    const erro = await requisicao.json();
+                    console.error("Erro: ", erro);
+                    alertaPage("danger", erro.mensagem, erro.logSuporte);
+                } else
+                {
+                    const erro = await requisicao.text();
+                    console.error("Erro: ", erro);
+                    alertaPage("danger", "Erro inesperado, tente novamente mais tarde ou entre em contato com o suporte");
+                }
+                return;
+            }
+
+            window.location.href = `${BASE_URL}/Home/Index`;
+        } catch (error)
+        {
+            console.error("Erro: ", error);
+            alertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
+        } finally
+        {
+            $('#btnLogin').val('Entrar').prop('disabled', false);
+        }
     });
 });

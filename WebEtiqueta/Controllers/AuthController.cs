@@ -20,7 +20,7 @@ namespace WebEtiqueta.Controllers
 
             if(id != null && !string.IsNullOrEmpty(id.Trim()))
             {
-                Resposta<MatrizModel> matriz = await _authService.PegarMatriz(id);
+                Resposta<MatrizModel> matriz = await _authService.PegarMatrizPorCnpjCpf(id);
             
                 TempData["AlertaTipo"]      = matriz.status ? "success" : "danger";
                 TempData["AlertaMensagem"]  = matriz.mensagem;
@@ -50,7 +50,8 @@ namespace WebEtiqueta.Controllers
                 return StatusCode(400, new
                 {
                     Status      = false,
-                    Mensagem    = "Login e Senha são obrigatórios"
+                    Mensagem    = "Login e Senha são obrigatórios",
+                    LogSuporte  = "Login e Senha são obrigatórios"
                 });
             }
 
