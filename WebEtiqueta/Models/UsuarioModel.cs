@@ -66,20 +66,5 @@ namespace WebEtiqueta.Models
             this.Login = login;
             this.Senha = senha;
         }
-
-        public bool VerificarSenhaLogin(string senha)
-        {
-            var hasher = new PasswordHasher<string>();
-
-            var senhaValida = hasher.VerifyHashedPassword(this.Login, this.Senha, senha);
-
-            if (senhaValida == PasswordVerificationResult.Success)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
     }
 }

@@ -15,19 +15,20 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Login(string id)
+        public async Task<IActionResult> Login(string? id)
         {
-
-            if(id != null && !string.IsNullOrEmpty(id.Trim()))
+            if(!string.IsNullOrWhiteSpace(id))
             {
                 Resposta<MatrizModel> matriz = await _authService.PegarMatrizPorCnpjCpf(id);
             
-                TempData["AlertaTipo"]      = matriz.status ? "success" : "danger";
-                TempData["AlertaMensagem"]  = matriz.mensagem;
-                TempData["LogSuporte"]      = matriz.logSuporte;
+                TempData["AlertaTipo"]      = matriz.Status ? "success" : "danger";
+                TempData["AlertaMensagem"]  = matriz.Mensagem;
+                TempData["LogSuporte"]      = matriz.LogSuporte;
 
-                if (matriz.status)
-                    ViewBag.Matriz = matriz.dados;
+                if (matriz.Status)
+                {
+                    ViewBag.Matriz = matriz.Dados;
+                }
             }
 
             return View("Login");
@@ -43,15 +44,12 @@ namespace WebEtiqueta.Controllers
         [HttpPost]
         public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha)
         {
-            usuarioLogin = usuarioLogin.Trim().ToLower();
-            usuarioSenha = usuarioSenha.Trim();
-            if (string.IsNullOrEmpty(usuarioLogin) || string.IsNullOrEmpty(usuarioSenha))
+            if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha))
             {
                 return StatusCode(400, new
                 {
                     Status      = false,
-                    Mensagem    = "Login e Senha são obrigatórios",
-                    LogSuporte  = "Login e Senha são obrigatórios"
+                    Mensagem    = "Login e Senha são obrigatórios"
                 });
             }
 
@@ -95,8 +93,36 @@ namespace WebEtiqueta.Controllers
             return StatusCode(200, new
             {
                 Status      = true,
-                Mensagem    = "Usuário autenticado com sucesso",
+                Mensagem    = "Usuário autenticado com sucesso"
             });
+        }
+
+        [HttpPost]
+        public  IActionResult SenhaSuporte(string? suporteSenha)
+        {
+            if (string.IsNullOrWhiteSpace(suporteSenha))
+            {
+                return StatusCode(400, new
+                {
+                    Status      = false,
+                    Mensagem    = "Senha de suporte é obrigatória"
+                });
+            }
+
+            string senha = suporteSenha.Trim();
+            Resposta<bool> autorizado = _authService.ValidarSenhaSuporte(senha);
+
+            if (!autorizado.status)
+            {
+                return StatusCode(401, new
+                {
+                    Status = autorizado.status,
+                    Mensagem = autorizado.mensagem,
+                    LogSuporte = autorizado.logSuporte
+                });
+            }
+
+            return StatusCode(200);
         }
     }
 }

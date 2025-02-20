@@ -2,21 +2,27 @@
 {
     public class Resposta<T>
     {
-        public bool status { get; set; }
-        public string mensagem { get; set; }
-        public string logSuporte { get; set; }
-        public T dados { get; set; }
+        public bool Status { get; set; }
+        public string Mensagem { get; set; }
+        public string LogSuporte { get; set; }
+        public T Dados { get; set; }
 
-        public Resposta (bool status, string mensagem, T dados = default, string logSuporte = null)
+        public Resposta() { }
+
+        // ✅ Construtor para sucesso
+        public Resposta(T dados, string mensagem = "Operação realizada com sucesso")
         {
-            this.status = status;
-            this.mensagem = mensagem;
-            this.dados = dados;
-            this.logSuporte = logSuporte;
+            Status = true;
+            Mensagem = mensagem;
+            Dados = dados;
         }
 
-        public Resposta()
+        // ✅ Construtor para erro
+        public Resposta(string mensagem, string logSuporte = "")
         {
+            Status = false;
+            Mensagem = mensagem;
+            LogSuporte = logSuporte;
         }
     }
 }

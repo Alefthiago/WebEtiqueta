@@ -22,32 +22,18 @@ namespace WebEtiqueta.Services
 
         public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string documento)
         {
+            if(string.IsNullOrWhiteSpace(documento))
+            {
+                return new Resposta<MatrizModel>("CNPJ/CPF é obrigatório");
+            }
+
             try
             {
-                //if (!Regex.IsMatch(documento, @"^\d+$"))
-                //{
-                //    return new Resposta<MatrizModel>(
-                //        status: false,
-                //        mensagem: "CNPJ/CPF inválido, digite apenas números"
-                //    );
-                //}
-
-                Resposta<MatrizModel> consulta = await _authRepoistory.PegarMatrizPorCnpjCpf(documento);
-                
-                return new Resposta<MatrizModel>(
-                    status: consulta.status,
-                    mensagem: consulta.mensagem,
-                    dados: consulta.dados,
-                    logSuporte: consulta.logSuporte
-                );
+                return await _authRepoistory.PegarMatrizPorCnpjCpf(documento);
             }
             catch (Exception e)
             {
-                return new Resposta<MatrizModel>(
-                    status: false,
-                    mensagem: "Erro inesperado ao buscar matriz, tente novamente mais tarde ou entre em contato com nosso suporte",
-                    logSuporte: $"AuthService/PegarMatriz: {e.Message}"
-                );
+                return new Resposta<MatrizModel>("Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}");
             }
         }
 
@@ -55,6 +41,10 @@ namespace WebEtiqueta.Services
         {
             try
             {
+                if(usuario == null)
+                {
+                    return new Resposta<string>("Informe os dados do Usuario");
+                }
                 List<Claim> claims = new List<Claim>
                 {
                     new Claim("UsuarioId", Convert.ToString(usuario.Id)),
@@ -71,50 +61,53 @@ namespace WebEtiqueta.Services
                 );
 
                 var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-                return new Resposta<string>(
-                    status: true,
-                    mensagem: "Token gerado com sucesso",
-                    dados: jwt
-                );
-
+                return new Resposta<string>(jwt, "Token gerado com sucesso");
             }
             catch (Exception e)
             {
-                return new Resposta<string>(
-                    status: false,
-                    mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte",
-                    logSuporte: e.Message
-                );
+                return new Resposta<string>(mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte", logSuporte: e.Message);
             }
         }
 
         public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha)
         {
+            if(string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(senha))
+            {
+                return new Resposta<UsuarioModel>(mensagem: "Login e Senha são obrigatórios");
+            }
+
             try
             {
                 Resposta<UsuarioModel> consulta = await _authRepoistory.ValidarLogin(login, senha);
-                if (!consulta.status)
-                { 
-                    return new Resposta<UsuarioModel>(
-                        status: false,
-                        mensagem: "Usuário ou senha inválidos!"
-                    );
-                }
-
-                return new Resposta<UsuarioModel>(
-                    status: true,
-                    mensagem: "Usuário autenticado",
-                    dados: consulta.dados
-                );
+                return consulta;
             }
             catch (Exception e)
             {
-                return new Resposta<UsuarioModel>(
-                    status: false,
-                    mensagem: "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!",
-                    logSuporte: e.Message
-                );
+                return new Resposta<UsuarioModel>("Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte", e.Message);
+            }
+        }
+
+        public Resposta<string> ValidarSenhaSuporte(string senha)
+        {
+            try
+            {
+                Resposta<string> senhaSuporte = _authRepoistory.ValidarSenhaSuporte(senha);
+
+                if (!senhaSuporte.Status)
+                {
+                    return senhaSuporte;
+                }
+
+                if (senhaSuporte.Dados != senha)
+                {
+                    return new Resposta<string>("Senha invalida");
+                }
+
+                return new Resposta<string>("Senha validada com sucesso");
+
+            } catch (Exception e)
+            {
+                return new Resposta<string>("Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthService/ValidarSenhaSuporte: {e.Message}");
             }
         }
     }

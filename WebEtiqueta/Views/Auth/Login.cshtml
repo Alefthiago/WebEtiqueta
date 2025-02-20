@@ -28,11 +28,11 @@
 
                     <div id="alertaPage" class="alert alert-alertaTipo bg-alertaTipo card-alert text-white shadow d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
                         <div>
-                            <span id="alertaPageTexto">
-                            </span>
-                            <i id="logSuporte" href="#" class="fas fa-info-circle"></i>
+                            <span id="alertaPageTexto"></span>
+                            <i id="btnAbrirSuporteModal" href="#" class="fas fa-info-circle"></i>
                         </div>
-                        <button id="close-btn-alerta" type="button" class="btn btn-light btn-circle">
+
+                        <button id="btnFecharAlertaPage" type="button" class="btn btn-light btn-circle">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -106,28 +106,7 @@
             </div>
         </div>
 
-
-        <div class="modal fade" id="logSuporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Log da Requisição</h5>
-                        <button class="close" type="button" data-dismiss="modal" aria-label="Fechar">
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p id="logSuporteTexto"></p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="senhaSuporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        <div class="modal fade" id="suporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -138,16 +117,22 @@
                         </button>
                     </div>
                     <form id="formSuporte">
-                    <div if="alertaFormSuporte" class="alert alert-danger" role="alert" style="border-radius: 0px; opacity: 0">
-                            <p id="formSuporteAlerta"></p>
+                        <div id="divLogSuporte" style="display: none">
+                            <p id="logSuporteTexto"></p>
                         </div>
 
-                        <div class="modal-body">
-                                <div class="form-group">
-                                    <input type="password" class="form-control form-control-user trim-input"
+                        <div id="divFormSuporte">
+                            <div id="alertaFormSuporte" class="alert alert-danger" role="alert" style="border-radius: 0px; display: none;">
+                                <span id="alertaFormSuporteTexto"></span>
+                            </div>
+
+                            <div class="modal-body">
+                                    <div class="form-group">
+                                        <input type="password" class="form-control form-control-user trim-input"
                                        id="suporteSenha" name="suporteSenha" placeholder="Senha"
-                                           required>
-                                </div>
+                                               >
+                                    </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <input id="btnSuporteSenha" type="submit" class="btn btn-primary btn-user btn-block" value="Confirmar">
@@ -166,56 +151,90 @@
         <!-- Core plugin JavaScript-->
         <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
         <script>
-            const BASE_URL = window.location.origin;
+            const BASE_URL      = window.location.origin;
 
-            function alertaPage(tipo, msg, logSuporte = null)
-            {
+            var ALERTA_MENSAGEM = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
+            var ALERTA_TIPO     = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
+            var LOG_SUPORTE     = @Html.Raw(Json.Serialize(TempData["LogSuporte"]) ?? ViewBag.LogSuporte ?? null); // mensagem de log
+
+            //      ELEMENTOS.      //
+            const $alertaPage           = $("#alertaPage");
+            const $alertaPageTexto      = $("#alertaPageTexto");
+            const $btnFecharAlertaPage  = $("#btnFecharAlertaPage");
+
+            const $btnAbrirSuporteModal = $("#btnAbrirSuporteModal");
+            const $logSuporteTexto      = $("#logSuporteTexto");
+            const $suporteModal         = $("#suporteModal");
+
+            const $divFormSuporte   = $("#divFormSuporte");
+            const $divLogSuporte    = $("#divLogSuporte");
+
+            const $alertaFormSuporte        = $("#alertaFormSuporte");
+            const $alertaFormSuporteTexto   = $("#alertaFormSuporteTexto");
+            //     /ELEMENTOS.      //
+
+            //      FUNÇÕES.        //
+            function abrirAlertaPage() {
+                // ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE
                 $alertaPage.css("opacity", 1);
-                tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
-                tipo == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
-                tipo == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
-                tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
+                ALERTA_TIPO == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
+                ALERTA_TIPO == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
 
-                $("#alertaPageTexto").text(msg);
-                logSuporte != null ? $("#logSuporte").show() : $("#logSuporte").hide();
-                $("#logSuporteTexto").text(logSuporte);
+                ALERTA_TIPO == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
+                ALERTA_TIPO == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
+
+                $alertaPageTexto.text(ALERTA_MENSAGEM);
+                if (LOG_SUPORTE != null) {
+                    $btnAbrirSuporteModal.show();
+                    $logSuporteTexto.text(LOG_SUPORTE);
+                } else {
+                    $btnAbrirSuporteModal.hide();
+                }
             }
 
-            function alertaFormSuporte(msg, logSuporte = null) 
-            {
-                
+            function abrirAlertaFormSuporte(msg) {
+                $alertaFormSuporte.css("display", "block");
+                $alertaFormSuporteTexto.text(msg);
             }
 
-             $(document).ready(function () {
-                $alertaPage = $("#alertaPage");
-                $btnClose   = $("#close-btn-alerta");
-
-                $alertaFormSuporte = $("#alertaFormSuporte");
-
-                $btnClose.click(function () {
-                    $alertaPage.css("opacity", 0);
-                });
-
-                var alertaMensagem  = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
-                var alertaTipo      = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
-                var logSuporte      = @Html.Raw(Json.Serialize(TempData["LogSuporte"]) ?? ViewBag.LogSuporte ?? null);
-
-                if (alertaTipo != null) {
-                    console.log(logSuporte);
-                    alertaPage(alertaTipo, alertaMensagem, logSuporte);
+            function fecharAlertaFormSuporte() {
+                $alertaFormSuporte.css("display", "none");
+                $alertaFormSuporteTexto.text(null);
+            }
+            //     /FUNÇÕES.        //
+            
+            $(document).ready(function () {
+                if (ALERTA_TIPO != null) {
+                    console.error("Erro: ", LOG_SUPORTE);
+                    abrirAlertaPage();
                 }
 
-                 $("#logSuporte").click(function () { 
-                     $("#senhaSuporteModal").modal("show");
-                 });
+                //      EVENTOS.        //
+                //      ABRIR/FECHAR MODAL.     //
+                $suporteModal.on('shown.bs.modal', function () {
+                    $("#suporteSenha").focus();
+                });
 
-                 $("#formSuporte").submit(async function (e) {
-                     e.preventDefault();
-                     $("#btnSuporteSenha").val("Carregando...").prop("disabled", true);
-                     let formData = new FormData(this);
+                $suporteModal.on('hidden.bs.modal', function () {
+                    fecharAlertaFormSuporte();
+                    $("#suporteSenha").val(null);
+                });
+                //     /ABRIR/FECHAR MODAL.     //
 
-                     try {
-                        const requisicao = await fetch(`${BASE_URL}/Auth/SenhaSuporte/`, {
+                //      CLICK.      //
+                $btnFecharAlertaPage.click(()   => $alertaPage.css("opacity", 0));
+                $btnAbrirSuporteModal.click(()  => $suporteModal.modal("show"));
+                //     /CLICK.      //
+
+                //      SUBMIT.     //
+                $("#formSuporte").submit(async function (e) {
+                    e.preventDefault();
+                    fecharAlertaFormSuporte();
+                    $("#btnSuporteSenha").val("Carregando...").prop("disabled", true);
+                    let formData = new FormData(this);
+
+                    try {
+                        const requisicao = await fetch(`${BASE_URL}/Auth/SenhaSuporte`, {
                             method: "POST",
                             body: formData
                         });
@@ -224,27 +243,43 @@
                             const contentType = requisicao.headers.get("content-type");
                             if (contentType && contentType.includes("application/json")) {
                                 const erro = await requisicao.json();
-                                console.erro("Erro: ", erro);
-                                alertaPage("danger", erro.mensagem, erro.logSuporte);
+                                console.error("Erro: ", erro.logSuporte);
+                                abrirAlertaFormSuporte(`Erro: ${erro.mensagem}`);
+                                // alertaPage("danger", erro.mensagem, erro.logSuporte);
                             } else {
                                 const erro = await requisicao.text();
-                                console.erro("Erro: ", erro);
-                                alertaPage("danger", "Erro inesperado, tente novamente mais tarde ou entre em contato com o suporte");
+                                console.error("Erro: ", erro);
+                                abrirAlertaFormSuporte("Erro: tente novamente mais tarde ou entre em contato com o suporte");
                             }
+
                             return;
                         }
 
                         $("#senhaSuporteModal").modal("hide");
                         $("logSuporteModal").modal("show");
-                     } catch (error) 
-                     {
-                         console.error("Erro: ", error);
-                         alertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
-                     } finally 
-                     { 
-                         $("#btnSuporteSenha").val("Confirmar").prop("disabled", false);
-                     }
-                 });
+                    } catch (error) 
+                    {
+                        console.error("Erro: ", error);
+                        abrirAlertaFormSuporte("Erro: tente novamente mais tarde ou entre em contato com o suporte");
+                    } finally
+                    { 
+                        $("#btnSuporteSenha").val("Confirmar").prop("disabled", false);
+                        $("#suporteSenha").val(null);
+                    }
+                });
+                //      SUBMIT.     //
+
+                //      KEYDOWN.        //
+                $(document).keydown(function (e) {
+                    if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "s") {
+                        e.preventDefault();
+                        if ($btnAbrirSuporteModal.is(":visible")) {
+                            $suporteModal.modal("show");
+                        }
+                    }
+                });
+                //     /KEYDOWN.        //
+                //     /EVENTOS.        //
             });
         </script>
         <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->
