@@ -35,7 +35,7 @@ namespace WebEtiqueta.Repositorys
                     .ToListAsync();
 
                 return new Resposta<List<EtiquetaModel>>(
-                    status: true,
+                    //status: true,
                     mensagem: "Etiquetas listadas com sucesso",
                     dados: etiquetas
                 );
@@ -43,7 +43,7 @@ namespace WebEtiqueta.Repositorys
             catch (Exception e)
             {
                 return new Resposta<List<EtiquetaModel>>(
-                    status: false,
+                    //status: false,
                     mensagem: "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
                     logSuporte: e.Message
                 );

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -20,20 +21,52 @@ namespace WebEtiqueta.Services
             _authRepoistory = authRepository;
         }
 
-        public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string documento)
+        public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string cnpjCpf)
         {
-            if(string.IsNullOrWhiteSpace(documento))
+            if(string.IsNullOrWhiteSpace(cnpjCpf))
             {
                 return new Resposta<MatrizModel>("CNPJ/CPF é obrigatório");
             }
 
             try
             {
-                return await _authRepoistory.PegarMatrizPorCnpjCpf(documento);
+                Resposta<MatrizModel>? matriz = await _authRepoistory.PegarMatrizPorCnpjCpf(cnpjCpf);
+                if(matriz == null)
+                {
+                    return new Resposta<MatrizModel>("Matriz não encontrada");
+                }
+
+                return matriz;
             }
             catch (Exception e)
             {
                 return new Resposta<MatrizModel>("Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}");
+            }
+        }
+
+        public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha)
+        {
+            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(senha))
+            {
+                return new Resposta<UsuarioModel>(mensagem: "Login e Senha são obrigatórios");
+            }
+
+            try
+            {
+                Resposta<UsuarioModel>? consultaUsuario = await _authRepoistory.ValidarLogin(login, senha);
+                if (consultaUsuario == null)
+                    return new Resposta<UsuarioModel>("Usuário não encontrado");
+                else if (consultaUsuario.Erro)
+                    return consultaUsuario;
+                else
+                {
+                    bool loginValido = ComprarSenhaLogin(consultaUsuario.Dados, senha);
+                    return loginValido ? consultaUsuario : new Resposta<UsuarioModel>("Senha inválida");
+                }
+            }
+            catch (Exception e)
+            {
+                return new Resposta<UsuarioModel>("Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte", e.Message);
             }
         }
 
@@ -69,24 +102,6 @@ namespace WebEtiqueta.Services
             }
         }
 
-        public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha)
-        {
-            if(string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(senha))
-            {
-                return new Resposta<UsuarioModel>(mensagem: "Login e Senha são obrigatórios");
-            }
-
-            try
-            {
-                Resposta<UsuarioModel> consulta = await _authRepoistory.ValidarLogin(login, senha);
-                return consulta;
-            }
-            catch (Exception e)
-            {
-                return new Resposta<UsuarioModel>("Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte", e.Message);
-            }
-        }
-
         public Resposta<string> ValidarSenhaSuporte(string senha)
         {
             try
@@ -109,6 +124,20 @@ namespace WebEtiqueta.Services
             {
                 return new Resposta<string>("Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthService/ValidarSenhaSuporte: {e.Message}");
             }
+        }
+
+        private bool ComprarSenhaLogin(UsuarioModel usuario, string senha)
+        {
+            var hasher = new PasswordHasher<string>();
+
+            var senhaValida = hasher.VerifyHashedPassword(usuario.Login, usuario.Senha, senha);
+
+            if (senhaValida == PasswordVerificationResult.Success)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

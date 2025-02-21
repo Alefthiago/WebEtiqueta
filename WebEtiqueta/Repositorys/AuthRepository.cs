@@ -15,38 +15,56 @@ namespace WebEtiqueta.Repositorys
             _configuration = configuration;
         }
         
-        public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string documento)
+        public async Task<Resposta<MatrizModel>?> PegarMatrizPorCnpjCpf(string cnpjCpf)
         {
             try
             {
                 var resultado = await _contexto.Matriz
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.CnpjCpf == documento);
+                    .FirstOrDefaultAsync(m => m.CnpjCpf == cnpjCpf);
                 if(resultado != null)
                 {
                     return new Resposta<MatrizModel>(resultado);
                 }
 
-                return new Resposta<MatrizModel>("Matriz não encontrada");
+                return null;
             } catch (Exception e)
             {
                 return new Resposta<MatrizModel>("Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthRepository/PegarMatrizPorCnpjCpf: {e.Message}");
             }
         }
 
-        public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha)
+        public async Task<Resposta<UsuarioModel>?> ValidarLogin(string login, string cnpjCpf)
         {
             try
             {
                 var resultado = await _contexto.Usuario
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Login == login);
-                if (resultado != null && VerificarSenhaLogin(resultado, senha))
+                    .Join(
+                        _contexto.Matriz,
+                        usuario => usuario.MatrizId,
+                        matriz => matriz.Id,
+                        (usuario, matriz) => new
+                        {
+                            Login = usuario.Login,
+                            Senha = usuario.Senha,
+                            Elimnado = usuario.Eliminado,
+                            MatrizCnpjCpf = matriz.CnpjCpf
+                        }
+                    )
+                    .Where(x => x.Elimnado == false && x.Login == login && x.MatrizCnpjCpf == cnpjCpf)
+                    .FirstOrDefaultAsync();
+                if (resultado != null)
                 {
-                    return new Resposta<UsuarioModel>(resultado);
+                    UsuarioModel usuario = new UsuarioModel
+                    {
+                        Login = resultado.Login,
+                        Senha = resultado.Senha
+                    };
+                    return new Resposta<UsuarioModel>(usuario);
                 }
 
-                return new Resposta<UsuarioModel>("Usuário ou senha inválidos");
+                return null;
             }
             catch (Exception e)
             {
@@ -64,20 +82,6 @@ namespace WebEtiqueta.Repositorys
             {
                 return new Resposta<string>(mensagem: "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthRepository/ValidarSenhaSuporte: {e.Message}");
             }
-        }
-
-        public bool VerificarSenhaLogin(UsuarioModel usuario, string senha)
-        {
-            var hasher = new PasswordHasher<string>();
-
-            var senhaValida = hasher.VerifyHashedPassword(usuario.Login, usuario.Senha, senha);
-
-            if (senhaValida == PasswordVerificationResult.Success)
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }
