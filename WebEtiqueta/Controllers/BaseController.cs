@@ -15,16 +15,24 @@ public class BaseController : Controller
 
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        if (Request.Cookies.TryGetValue("AuthToken", out var token))
+        if (context.HttpContext.Request.Cookies.TryGetValue("AuthToken", out var token))
         {
             bool usuarioAutenticado = Jwt.ValidarJwtToken(token, _configuration);
-            var usuarioId = Jwt.DadosToken(token)["UsuarioId"];
 
-            if (usuarioAutenticado && int.TryParse(usuarioId, out var usuarioIdInt) && usuarioIdInt == HttpContext.Session.GetInt32("UsuarioId").GetValueOrDefault())
+            if (usuarioAutenticado)
             {
-                Dictionary<string, string> dadosToken = Jwt.DadosToken(token);
-                context.HttpContext.Items["DadosToken"] = dadosToken;
-                return;
+                var dadosToken = Jwt.DadosToken(token);
+
+                if (dadosToken.TryGetValue("Usuario", out var usuarioToken))
+                {
+                    var usuarioSessao = context.HttpContext.Session.GetString("Usuario");
+
+                    if (!string.IsNullOrEmpty(usuarioSessao) && usuarioToken == usuarioSessao)
+                    {
+                        context.HttpContext.Items["DadosToken"] = dadosToken;
+                        return;
+                    }
+                }
             }
         }
 

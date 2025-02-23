@@ -12,10 +12,10 @@ $(document).ready(function () {
         },
         "pageLength": 10,
         "lengthChange": false,
-        ajax: {
-            url: "/Home/GetEtiquetas",
-            dataSrc: ''
-        },
+        //ajax: {
+        //    url: "/Home/GetEtiquetas",
+        //    dataSrc: ''
+        //},
     });
     loadTabela("tabelaEtiquetasGeral");
 });

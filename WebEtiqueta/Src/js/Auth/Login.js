@@ -15,6 +15,11 @@ $(document).ready(function () {
     $('#formLogin').submit(async function (e) {
         e.preventDefault();
         $('#btnLogin').val('Carregando...').prop('disabled', true);
+
+        //$("#usuarioLogin").val(function (index, value) {
+        //    return value.toLowerCase();
+        //});
+
         let formData = new FormData(this);
 
         try
@@ -30,21 +35,21 @@ $(document).ready(function () {
                 if (contentType && contentType.includes("application/json")) {
                     const erro = await requisicao.json();
                     console.error("Erro: ", erro);
-                    alertaPage("danger", erro.mensagem, erro.logSuporte);
+                    abrirAlertaPage("danger", erro.mensagem, erro.logSuporte);
                 } else
                 {
                     const erro = await requisicao.text();
                     console.error("Erro: ", erro);
-                    alertaPage("danger", "Erro inesperado, tente novamente mais tarde ou entre em contato com o suporte");
+                    abrirAlertaPage("danger", "Erro inesperado, tente novamente mais tarde ou entre em contato com o suporte");
                 }
                 return;
             }
 
-            window.location.href = `${BASE_URL}/Home/Index`;
+            window.location.href = `${BASE_URL}`;
         } catch (error)
         {
             console.error("Erro: ", error);
-            alertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
+            abrirAlertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
         } finally
         {
             $('#btnLogin').val('Entrar').prop('disabled', false);

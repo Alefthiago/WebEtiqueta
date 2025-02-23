@@ -21,8 +21,6 @@ builder.Services.AddScoped<EtiquetaRepository>();
 builder.Services.AddScoped<AuthRepository>();
 
 builder.Services.AddDistributedMemoryCache();
-
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromDays(1); // Expiração da sessão em 1 dia
@@ -33,7 +31,6 @@ builder.Services.AddSession(options =>
 // Adiciona o DbContext e configura o uso do Npgsql
 builder.Services.AddDbContext<Contexto>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 var app = builder.Build();
 

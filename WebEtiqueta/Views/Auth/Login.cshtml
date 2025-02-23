@@ -56,7 +56,7 @@
                                         <form class="user" id="formLogin">
                                             <div class="form-group">
                                                 <input type="@(ViewBag.Matriz != null ? "hidden" : "text")" class="form-control form-control-user trim-input"
-                                                        id="matrizDocumento" name="matrizDocumento" placeholder="CNPJ/CPF" 
+                                                   id="matrizCnpjCpf" name="matrizCnpjCpf" placeholder="CNPJ/CPF"
                                                         value="@(ViewBag.Matriz != null ? ViewBag.Matriz.CnpjCpf : "")" 
                                                         required>
                                             </div>
@@ -115,7 +115,7 @@
                         </button>
                     </div>
                     <form id="formSuporte">
-                        <div id="divLogSuporte" style="display: none">
+                        <div id="divLogSuporte" style="display: none; padding: 5px">
                             <p id="logSuporteTexto"></p>
                         </div>
 
@@ -172,24 +172,6 @@
             //     /ELEMENTOS.      //
 
             //      FUNÇÕES.        //
-            function abrirAlertaPage() {
-                // ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE
-                $alertaPage.css("opacity", 1);
-                ALERTA_TIPO == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
-                ALERTA_TIPO == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
-
-                ALERTA_TIPO == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
-                ALERTA_TIPO == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
-
-                $alertaPageTexto.text(ALERTA_MENSAGEM);
-                if (LOG_SUPORTE != null) {
-                    $btnAbrirSuporteModal.show();
-                    $logSuporteTexto.text(LOG_SUPORTE);
-                } else {
-                    $btnAbrirSuporteModal.hide();
-                }
-            }
-
             function abrirAlertaFormSuporte(msg) {
                 $alertaFormSuporte.css("display", "block");
                 $alertaFormSuporteTexto.text(msg);
@@ -199,12 +181,34 @@
                 $alertaFormSuporte.css("display", "none");
                 $alertaFormSuporteTexto.text(null);
             }
+
+            function definirLog(msg) {
+                $logSuporteTexto.text(msg);
+            }
+
+            function abrirAlertaPage(tipo, mensagem, log) {
+                // ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE
+                $alertaPage.css("opacity", 1);
+                tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
+                tipo == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
+
+                tipo == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
+                tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
+
+                $alertaPageTexto.text(mensagem);
+                if (log != null) {
+                    $btnAbrirSuporteModal.show();
+                    definirLog(log);
+                } else {
+                    $btnAbrirSuporteModal.hide();
+                }
+            }
             //     /FUNÇÕES.        //
             
             $(document).ready(function () {
                 if (ALERTA_TIPO != null) {
                     console.error("Erro: ", LOG_SUPORTE);
-                    abrirAlertaPage();
+                    abrirAlertaPage(ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE);
                 }
 
                 //      EVENTOS.        //
@@ -216,6 +220,8 @@
                 $suporteModal.on('hidden.bs.modal', function () {
                     fecharAlertaFormSuporte();
                     $("#suporteSenha").val(null);
+				    $divFormSuporte.css("display", "block");
+			        $divLogSuporte.css("display", "none");
                 });
                 //     /ABRIR/FECHAR MODAL.     //
 
@@ -227,8 +233,10 @@
                 //      SUBMIT.     //
                 $("#formSuporte").submit(async function (e) {
                     e.preventDefault();
+				    if($logSuporteTexto.is(":visible")) return;
                     fecharAlertaFormSuporte();
                     $("#btnSuporteSenha").val("Carregando...").prop("disabled", true);
+                    
                     let formData = new FormData(this);
 
                     try {
@@ -243,7 +251,6 @@
                                 const erro = await requisicao.json();
                                 console.error("Erro: ", erro.logSuporte);
                                 abrirAlertaFormSuporte(`Erro: ${erro.mensagem}`);
-                                // alertaPage("danger", erro.mensagem, erro.logSuporte);
                             } else {
                                 const erro = await requisicao.text();
                                 console.error("Erro: ", erro);
@@ -253,8 +260,8 @@
                             return;
                         }
 
-                        $("#senhaSuporteModal").modal("hide");
-                        $("logSuporteModal").modal("show");
+					    $divFormSuporte.css("display", "none");
+				        $divLogSuporte.css("display", "block");
                     } catch (error) 
                     {
                         console.error("Erro: ", error);

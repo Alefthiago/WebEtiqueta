@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 
@@ -24,17 +23,23 @@ namespace WebEtiqueta.Repositorys
                     .FirstOrDefaultAsync(m => m.CnpjCpf == cnpjCpf);
                 if(resultado != null)
                 {
-                    return new Resposta<MatrizModel>(resultado);
+                    if (!string.IsNullOrWhiteSpace(resultado.Nome) && !string.IsNullOrWhiteSpace(resultado.CnpjCpf))
+                    {
+                        return new Resposta<MatrizModel>(resultado);
+                    }
                 }
 
                 return null;
             } catch (Exception e)
             {
-                return new Resposta<MatrizModel>("Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthRepository/PegarMatrizPorCnpjCpf: {e.Message}");
+                return new Resposta<MatrizModel>(
+                    "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", 
+                    $"AuthRepository/PegarMatrizPorCnpjCpf: {e.Message}"
+                );
             }
         }
 
-        public async Task<Resposta<UsuarioModel>?> ValidarLogin(string login, string cnpjCpf)
+        public async Task<Resposta<UsuarioModel>?> PegarUsuarioPorLoginCnpjCpf(string loginUsuario, string cnpjCpfMatriz)
         {
             try
             {
@@ -46,41 +51,62 @@ namespace WebEtiqueta.Repositorys
                         matriz => matriz.Id,
                         (usuario, matriz) => new
                         {
-                            Login = usuario.Login,
-                            Senha = usuario.Senha,
-                            Elimnado = usuario.Eliminado,
-                            MatrizCnpjCpf = matriz.CnpjCpf
+                            Login           = usuario.Login,
+                            Senha           = usuario.Senha,
+                            Elimnado        = usuario.Eliminado,
+                            MatrizCnpjCpf   = matriz.CnpjCpf
                         }
                     )
-                    .Where(x => x.Elimnado == false && x.Login == login && x.MatrizCnpjCpf == cnpjCpf)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(x => 
+                        !x.Elimnado && 
+                        x.Login == loginUsuario && 
+                        x.MatrizCnpjCpf == cnpjCpfMatriz
+                    );
                 if (resultado != null)
                 {
-                    UsuarioModel usuario = new UsuarioModel
+                    if(!string.IsNullOrWhiteSpace(resultado.Login) && !string.IsNullOrWhiteSpace(resultado.Senha))
                     {
-                        Login = resultado.Login,
-                        Senha = resultado.Senha
-                    };
-                    return new Resposta<UsuarioModel>(usuario);
+                        UsuarioModel usuario = new UsuarioModel
+                        {
+                            Login   = resultado.Login,
+                            Senha   = resultado.Senha,
+                            Matriz  = new MatrizModel { CnpjCpf = resultado.MatrizCnpjCpf }
+                        };
+                        return new Resposta<UsuarioModel>(usuario);
+                    }
                 }
 
                 return null;
             }
             catch (Exception e)
             {
-                return new Resposta<UsuarioModel>("Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthRepository/ValidaLogin: {e.Message}");
+                return new Resposta<UsuarioModel>(
+                    "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte!", 
+                    $"AuthRepository/ValidaLogin: {e.Message}"
+                );
             }
         }
 
-        public Resposta<string> ValidarSenhaSuporte(string senha)
+        public Resposta<string>? SenhaSuporte(string senha)
         {
             try
             {
-                string senhaSuporte = _configuration.GetSection("SenhaSuporte").Value;
-                return new Resposta<string>(senhaSuporte);
+                string? senhaSuporte = _configuration.GetValue<string>("SenhaSuporte");
+                if (!string.IsNullOrWhiteSpace(senhaSuporte) && senhaSuporte != null)
+                {
+                     return new Resposta<string>()
+                     {
+                         Status = true,
+                         Dados  = senhaSuporte
+                     };
+                }
+                else return null;
             } catch (Exception e)
             {
-                return new Resposta<string>(mensagem: "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", $"AuthRepository/ValidarSenhaSuporte: {e.Message}");
+                return new Resposta<string>(
+                    "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", 
+                    $"AuthRepository/ValidarSenhaSuporte: {e.Message}"
+                );
             }
         }
     }

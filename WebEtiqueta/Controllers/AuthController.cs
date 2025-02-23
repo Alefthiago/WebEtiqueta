@@ -19,21 +19,30 @@ namespace WebEtiqueta.Controllers
         {
             if(!string.IsNullOrWhiteSpace(id))
             {
-                Resposta<MatrizModel> matriz = await _authService.PegarMatrizPorCnpjCpf(id);
-                
-                if(!matriz.Status)
+                try
+                {
+                    Resposta<MatrizModel> matriz = await _authService.PegarMatrizPorCnpjCpf(id);
+                    if (!matriz.Status || matriz.Dados == default)
+                    {
+                        TempData["AlertaTipo"]      = "danger";
+                        TempData["AlertaMensagem"]  = matriz.Mensagem ?? "Não foi possível carregar os dados";
+                        TempData["LogSuporte"]      = matriz.LogSuporte;
+                    } else
+                    {
+                        ViewBag.Matriz = new
+                        {
+                            Nome    = matriz.Dados.Nome,
+                            CnpjCpf = matriz.Dados.CnpjCpf
+                        };
+                    }
+                }
+                catch (Exception e)
                 {
                     TempData["AlertaTipo"]      = "danger";
-                    TempData["AlertaMensagem"]  = matriz.Mensagem;
-                    TempData["LogSuporte"]      = matriz.Erro ? matriz.LogSuporte : null;
+                    TempData["AlertaMensagem"]  = "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!";
+                    TempData["LogSuporte"]      = $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}";
 
                     return View("Login");
-                }
-                
-                if (matriz.Status && matriz.Dados != null)
-                {
-                    ViewBag.Matriz.Nome = matriz.Dados.Nome;
-                    ViewBag.Matriz.CnpjCpf = matriz.Dados.CnpjCpf;
                 }
             }
 
@@ -48,96 +57,135 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha)
+        public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha, string matrizCnpjCpf)
         {
-            if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha))
+            if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha) || string.IsNullOrWhiteSpace(matrizCnpjCpf))
             {
                 return StatusCode(400, new
                 {
                     Status      = false,
-                    Mensagem    = "Login e Senha são obrigatórios"
+                    Mensagem    = "Todos os dados são obrigatórios"
                 });
             }
+
             try
             {
-                Resposta<UsuarioModel> usuario = await _authService.ValidarLogin(usuarioLogin, usuarioSenha);
-
-                if (!usuario.Status)
+                Resposta<UsuarioModel> usuarioConsulta = await _authService.ValidarLogin(usuarioLogin.Trim().ToLower(), usuarioSenha.Trim().ToLower(), matrizCnpjCpf.Trim().ToLower());
+                if (!usuarioConsulta.Status)
                 {
-                    return StatusCode(401, new
+                    return StatusCode(400, new
                     {
-                        Status = usuario.Status,
-                        Mensagem = usuario.Mensagem,
-                        LogSuporte = usuario.LogSuporte
+                        Status      = usuarioConsulta.Status,
+                        Mensagem    = usuarioConsulta.Mensagem,
+                        LogSuporte  = usuarioConsulta.LogSuporte
                     });
                 }
 
-                Resposta<String> jwt = _authService.GerarJwtToken(usuario.Dados);
-                if (!jwt.Status)
+                if(usuarioConsulta.Dados != null || usuarioConsulta.Dados != default)
                 {
-                    return StatusCode(401, new
+                    UsuarioModel usuario = usuarioConsulta.Dados;
+
+                    Resposta<String> jwt = _authService.GerarJwtToken(usuario);
+                    if (!jwt.Status)
                     {
-                        Status = jwt.Status,
-                        Mensagem = jwt.Mensagem,
-                        LogSuporte = jwt.LogSuporte
+                        return StatusCode(400, new
+                        {
+                            Status      = jwt.Status,
+                            Mensagem    = jwt.Mensagem,
+                            LogSuporte  = jwt.LogSuporte
+                        });
+                    }
+
+                    if(string.IsNullOrWhiteSpace(jwt.Dados))
+                    {
+                        return StatusCode(400, new
+                        {
+                            Status      = false,
+                            Mensagem    = "Erro ao gerar token de autenticação"
+                        });
+                    }
+
+                    // Criando o cookie
+                    Response.Cookies.Append("AuthToken", jwt.Dados, new CookieOptions
+                    {
+                        HttpOnly    = true,   // Protege contra acesso via JavaScript
+                        Secure      = false,    // ⚠️ Use `true` em produção (HTTPS)
+                        SameSite    = SameSiteMode.Lax, // Permite envio em navegação normal
+                        Expires     = DateTime.UtcNow.AddDays(1) // Tempo de expiração
+                    });
+
+                    HttpContext.Session.SetString("Usuario", usuario.Login);
+                    HttpContext.Session.SetString("Matriz", usuario.Matriz.CnpjCpf);
+
+                    return StatusCode(200, new
+                    {
+                        Status      = true,
+                        Mensagem    = "Usuário autenticado com sucesso"
                     });
                 }
 
-                // Criando o cookie
-                Response.Cookies.Append("AuthToken", jwt.Dados, new CookieOptions
+                return StatusCode(400, new
                 {
-                    HttpOnly = true,   // Protege contra acesso via JavaScript
-                    Secure = false,    // ⚠️ Use `true` em produção (HTTPS)
-                    SameSite = SameSiteMode.Lax, // Permite envio em navegação normal
-                    Expires = DateTime.UtcNow.AddDays(1) // Tempo de expiração
-                });
-
-                HttpContext.Session.SetString("UsuarioNome", usuario.Dados.Nome);
-                HttpContext.Session.SetInt32("UsuarioId", usuario.Dados.Id);
-                //HttpContext.Session.SetInt32("MatrizCnpjCpf", usuario.dados.MatrizId);
-
-                return StatusCode(200, new
-                {
-                    Status = true,
-                    Mensagem = "Usuário autenticado com sucesso"
+                    Status      = false,
+                    Mensagem    = "Usuário não encontrado"
                 });
             } catch (Exception e)
             {
                 return StatusCode(500, new
                 {
-                    Status = false,
-                    Mensagem = "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte",
-                    LogSuporte = $"AuthController/ValidarLogin: {e.Message}"
+                    Status      = false,
+                    Mensagem    = "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte",
+                    LogSuporte  = $"AuthController/ValidarLogin: {e.Message}"
                 });
             }
         }
 
-        //[HttpPost]
-        //public  IActionResult SenhaSuporte(string? suporteSenha)
-        //{
-        //    if (string.IsNullOrWhiteSpace(suporteSenha))
-        //    {
-        //        return StatusCode(400, new
-        //        {
-        //            Status      = false,
-        //            Mensagem    = "Senha de suporte é obrigatória"
-        //        });
-        //    }
+        [HttpPost]
+        public IActionResult SenhaSuporte(string suporteSenha)
+        {
+            if (string.IsNullOrWhiteSpace(suporteSenha))
+            {
+                return StatusCode(400, new
+                {
+                    Status = false,
+                    Mensagem = "Senha obrigatória"
+                });
+            }
 
-        //    string senha = suporteSenha.Trim();
-        //    Resposta<bool> autorizado = _authService.ValidarSenhaSuporte(senha);
+            try
+            {
+                string senha = suporteSenha;
+                Resposta<bool> autorizado = _authService.ValidarSenhaSuporte(senha);
 
-        //    if (!autorizado.status)
-        //    {
-        //        return StatusCode(401, new
-        //        {
-        //            Status = autorizado.status,
-        //            Mensagem = autorizado.mensagem,
-        //            LogSuporte = autorizado.logSuporte
-        //        });
-        //    }
+                if (!autorizado.Status)
+                {
+                    return StatusCode(400, new
+                    {
+                        Status = autorizado.Status,
+                        Mensagem = autorizado.Mensagem,
+                        LogSuporte = autorizado.LogSuporte
+                    });
+                }
+                else if (!autorizado.Dados)
+                {
+                    return StatusCode(402, new
+                    {
+                        Status = false,
+                        Mensagem = "Acesso não autorizado"
+                    });
+                }
 
-        //    return StatusCode(200);
-        //}
+                return StatusCode(200);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, new
+                {
+                    Status = false,
+                    Mensagem = "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte",
+                    LogSuporte = $"AuthController/SenhaSuporte: {e.Message}"
+                });
+            }
+        }
     }
 }

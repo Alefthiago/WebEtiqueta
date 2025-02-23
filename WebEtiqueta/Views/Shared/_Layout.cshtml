@@ -237,13 +237,13 @@
                             <i class="fas fa-download fa-sm text-white-50"></i> Baixar QZ Tray</a>
                     </div>
 
-                    <div id="alertaPage" class="alert alert-alertaTipo bg-alertaTipo card-alert text-white shadow mb-3 d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
+                    <div id="alertaPage" class="alert alert-alertaTipo bg-alertaTipo card-alert text-white shadow d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
                         <div>
-                            <span id="alertaPageTexto">
-                            </span>
-                            <i id="logSuporte" data-uId="@(Context.Session.GetInt32("UsuarioId"))" href="#" class="fas fa-info-circle" data-toggle="modal" data-target="#logSuporteModal"></i>
+                            <span id="alertaPageTexto"></span>
+                            <i id="btnAbrirSuporteModal" href="#" class="fas fa-info-circle"></i>
                         </div>
-                        <button id="close-btn-alerta" type="button" class="btn btn-light btn-circle">
+
+                        <button id="btnFecharAlertaPage" type="button" class="btn btn-light btn-circle">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -334,18 +334,29 @@
     <script src="~/js/responsive.dataTables.js"></script>
     <script src="~/js/rowReorder.dataTables.js"></script>
     <script>
-        function alertaPage(tipo, msg, logSuporte)
-        {
-            $alertaPage.css("opacity", 1);
-            tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
-            tipo == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
-            tipo == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
-            tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
+        const BASE_URL      = window.location.origin;
 
-            $("#alertaPageTexto").text(msg);
-            $("#logSuporte").data("uid") == 1 && logSuporte != null ? $("#logSuporte").show() : $("#logSuporte").hide();
-        }
+        var ALERTA_MENSAGEM = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
+        var ALERTA_TIPO     = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
+        var LOG_SUPORTE     = @Html.Raw(Json.Serialize(TempData["LogSuporte"]) ?? ViewBag.LogSuporte ?? null); // mensagem de log
 
+        //      ELEMENTOS.      //
+        const $alertaPage           = $("#alertaPage");
+        const $alertaPageTexto      = $("#alertaPageTexto");
+        const $btnFecharAlertaPage  = $("#btnFecharAlertaPage");
+
+        const $btnAbrirSuporteModal = $("#btnAbrirSuporteModal");
+        const $logSuporteTexto      = $("#logSuporteTexto");
+        const $suporteModal         = $("#suporteModal");
+
+        const $divFormSuporte   = $("#divFormSuporte");
+        const $divLogSuporte    = $("#divLogSuporte");
+
+        const $alertaFormSuporte        = $("#alertaFormSuporte");
+        const $alertaFormSuporteTexto   = $("#alertaFormSuporteTexto");
+        //     /ELEMENTOS.      //
+
+        //      FUNÇÕES.        //
         function loadTabela(idTabela) {
            let tbody = $(`#${idTabela} tbody`);
 
@@ -378,23 +389,121 @@
                 `;
                 tbody.append(row);
             }
+        }
+
+        function abrirAlertaFormSuporte(msg) {
+            $alertaFormSuporte.css("display", "block");
+            $alertaFormSuporteTexto.text(msg);
+        }
+
+        function fecharAlertaFormSuporte() {
+            $alertaFormSuporte.css("display", "none");
+            $alertaFormSuporteTexto.text(null);
+        }
+
+        function definirLog(msg) {
+            $logSuporteTexto.text(msg);
+        }
+
+        function abrirAlertaPage(tipo, mensagem, log) {
+            // ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE
+            $alertaPage.css("opacity", 1);
+            tipo == "danger" ? $alertaPage.addClass("alert-danger") : $alertaPage.addClass("alert-success");
+            tipo == "danger" ? $alertaPage.removeClass("alert-success") : $alertaPage.removeClass("alert-danger");
+
+            tipo == "danger" ? $alertaPage.removeClass("bg-success") : $alertaPage.removeClass("bg-danger");
+            tipo == "danger" ? $alertaPage.addClass("bg-danger") : $alertaPage.addClass("bg-success");
+
+            $alertaPageTexto.text(mensagem);
+            if (log != null) {
+                $btnAbrirSuporteModal.show();
+                definirLog(log);
+            } else {
+                $btnAbrirSuporteModal.hide();
             }
+        }
+        //     /FUNÇÕES.        //
 
         $(document).ready(function () {
-            $alertaPage = $("#alertaPage");
-            $btnClose = $("#close-btn-alerta");
+            if (ALERTA_TIPO != null) {
+                console.error("Erro: ", LOG_SUPORTE);
+                abrirAlertaPage(ALERTA_TIPO, ALERTA_MENSAGEM, LOG_SUPORTE);
+            }
 
-            $btnClose.click(function () {
-                $alertaPage.css("opacity", 0);
+            //      EVENTOS.        //
+            //      ABRIR/FECHAR MODAL.     //
+            $suporteModal.on('shown.bs.modal', function () {
+                $("#suporteSenha").focus();
             });
 
-            var alertaMensagem = @Html.Raw(Json.Serialize(TempData["AlertaMensagem"] ?? ViewBag.AlertaMensagem));
-            var alertaTipo = @Html.Raw(Json.Serialize(TempData["AlertaTipo"] ?? ViewBag.AlertaTipo ?? null));
-            var logSuporte = @Html.Raw(Json.Serialize(TempData["AlertaLogSuporte"]) ?? ViewBag.AlertaLogSuporte ?? null);
+            $suporteModal.on('hidden.bs.modal', function () {
+                fecharAlertaFormSuporte();
+                $("#suporteSenha").val(null);
+                $divFormSuporte.css("display", "block");
+                $divLogSuporte.css("display", "none");
+            });
+            //     /ABRIR/FECHAR MODAL.     //
 
-            if (alertaTipo != null) {
-                alertaPage(alertaTipo, alertaMensagem, logSuporte);
-            }
+            //      CLICK.      //
+            $btnFecharAlertaPage.click(()   => $alertaPage.css("opacity", 0));
+            $btnAbrirSuporteModal.click(()  => $suporteModal.modal("show"));
+            //     /CLICK.      //
+
+            //      SUBMIT.     //
+            $("#formSuporte").submit(async function (e) {
+                e.preventDefault();
+                if($logSuporteTexto.is(":visible")) return;
+                fecharAlertaFormSuporte();
+                $("#btnSuporteSenha").val("Carregando...").prop("disabled", true);
+
+                let formData = new FormData(this);
+
+                try {
+                    const requisicao = await fetch(`${BASE_URL}/Auth/SenhaSuporte`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!requisicao.ok) {
+                        const contentType = requisicao.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            const erro = await requisicao.json();
+                            console.error("Erro: ", erro.logSuporte);
+                            abrirAlertaFormSuporte(`Erro: ${erro.mensagem}`);
+                        } else {
+                            const erro = await requisicao.text();
+                            console.error("Erro: ", erro);
+                            abrirAlertaFormSuporte("Erro: tente novamente mais tarde ou entre em contato com o suporte");
+                        }
+
+                        return;
+                    }
+
+                    $divFormSuporte.css("display", "none");
+                    $divLogSuporte.css("display", "block");
+                } catch (error)
+                {
+                    console.error("Erro: ", error);
+                    abrirAlertaFormSuporte("Erro: tente novamente mais tarde ou entre em contato com o suporte");
+                } finally
+                {
+                    $("#btnSuporteSenha").val("Confirmar").prop("disabled", false);
+                    $("#suporteSenha").val(null);
+                }
+            });
+            //      SUBMIT.     //
+
+            //      KEYDOWN.        //
+            $(document).keydown(function (e) {
+                if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "s") {
+                    e.preventDefault();
+                    if ($btnAbrirSuporteModal.is(":visible")) {
+                        $suporteModal.modal("show");
+                    }
+                }
+            });
+            //     /KEYDOWN.        //
+            //     /EVENTOS.        //
         });
     </script>
     <!-- 1 Carrega os arquivos em todas as Views; 2 Carrega os arquivos em todas as View de um mesmo grupo; 3 Carrega os arquivos especificos de cada View -->
