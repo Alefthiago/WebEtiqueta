@@ -52,6 +52,7 @@ namespace WebEtiqueta.Repositorys
                         (usuario, matriz) => new
                         {
                             Login           = usuario.Login,
+                            Nome            = usuario.Nome,
                             Senha           = usuario.Senha,
                             Elimnado        = usuario.Eliminado,
                             MatrizCnpjCpf   = matriz.CnpjCpf
@@ -69,6 +70,7 @@ namespace WebEtiqueta.Repositorys
                         UsuarioModel usuario = new UsuarioModel
                         {
                             Login   = resultado.Login,
+                            Nome    = resultado.Nome,
                             Senha   = resultado.Senha,
                             Matriz  = new MatrizModel { CnpjCpf = resultado.MatrizCnpjCpf }
                         };
@@ -91,7 +93,9 @@ namespace WebEtiqueta.Repositorys
         {
             try
             {
-                string? senhaSuporte = _configuration.GetValue<string>("SenhaSuporte");
+                //string? senhaSuporte = _configuration.GetValue<string>("Suprote:SenhaSuporte");
+                string? senhaSuporte = _configuration.GetSection("Suporte:SenhaSuporte").Value;
+                Console.WriteLine(senhaSuporte);
                 if (!string.IsNullOrWhiteSpace(senhaSuporte) && senhaSuporte != null)
                 {
                      return new Resposta<string>()

@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using WebEtiqueta.Helpers;
+﻿using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 using WebEtiqueta.Repositorys;
 
@@ -21,18 +17,15 @@ namespace WebEtiqueta.Services
         public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string cnpjCpf)
         {
             if(string.IsNullOrWhiteSpace(cnpjCpf))
-            {
                 return new Resposta<MatrizModel>("CNPJ/CPF é obrigatório");
-            }
 
             try
             {
                 Resposta<MatrizModel>? matriz = await _authRepoistory.PegarMatrizPorCnpjCpf(cnpjCpf);
                 if(matriz == null)
-                {
                     return new Resposta<MatrizModel>("Matriz não encontrada");
-                }
-                return matriz;
+                else
+                    return matriz;
             }
             catch (Exception e)
             {
@@ -45,18 +38,50 @@ namespace WebEtiqueta.Services
 
         public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha, string cnpjCpf)
         {
-            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(senha) || string.IsNullOrWhiteSpace(cnpjCpf))
-            {
-                return new Resposta<UsuarioModel>("Todos os dados são obrigatórios");
-            }
-
             try
             {
-                Resposta<UsuarioModel>? consultaUsuario = await _authRepoistory.PegarUsuarioPorLoginCnpjCpf(login, cnpjCpf);
-                if (consultaUsuario == null) return new Resposta<UsuarioModel>("Dados Inválidos"); // Se o usuario não for encontrado
-                else if (!consultaUsuario.Status) return consultaUsuario; // Se houver erro na consulta
+                Resposta<UsuarioModel>? consultaUsuario;
 
-                if(!ComprarSenhaLogin(consultaUsuario.Dados, senha)) return new Resposta<UsuarioModel>("Dados Inválidos");
+                string? loginSuporte = _config.GetSection("Suporte:LoginSuporte").Value;
+                string? senhaSuporte = _config.GetSection("Suporte:SenhaSuporte").Value;
+                if(string.IsNullOrWhiteSpace(loginSuporte) || string.IsNullOrWhiteSpace(senhaSuporte)) 
+                    return new Resposta<UsuarioModel>("Dados de suporte não configurados");
+
+                if (loginSuporte == login)
+                {
+                    Resposta<MatrizModel>? consultaMatriz = await _authRepoistory.PegarMatrizPorCnpjCpf(cnpjCpf);
+                    if (consultaMatriz == null) 
+                        return new Resposta<UsuarioModel>("Matriz não encontrada");
+                    else if (!consultaMatriz.Status) 
+                        return new Resposta<UsuarioModel>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
+
+                    UsuarioModel usuarioSuporte = new UsuarioModel()
+                    {
+                        Login   = loginSuporte,
+                        Nome    = loginSuporte,
+                        Senha   = senhaSuporte,
+                        Matriz  = new MatrizModel()
+                        {
+                            CnpjCpf = cnpjCpf
+                        }
+                    };
+
+                    if (!Util.CompararSenha(usuarioSuporte, senha)) 
+                        return new Resposta<UsuarioModel>("Dados Inválidos");
+
+                    consultaUsuario = new Resposta<UsuarioModel>(usuarioSuporte);
+                }
+                else
+                {
+                    consultaUsuario = await _authRepoistory.PegarUsuarioPorLoginCnpjCpf(login, cnpjCpf);
+                    if (consultaUsuario == null) // consulta sem resultado
+                        return new Resposta<UsuarioModel>("Dados Inválidos");
+                    else if (!consultaUsuario.Status) // erro na consulta
+                        return consultaUsuario;
+
+                    if (!Util.CompararSenha(consultaUsuario.Dados, senha))
+                        return new Resposta<UsuarioModel>("Dados Inválidos");
+                }
 
                 return consultaUsuario;
             }
@@ -66,45 +91,6 @@ namespace WebEtiqueta.Services
                     "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte",
                     $"AuthService/ValidarLogin: {e.Message}"
                 );
-            }
-        }
-
-        public Resposta<String> GerarJwtToken(UsuarioModel usuario)
-        {
-            try
-            {
-                if(usuario == null)
-                {
-                    return new Resposta<string>("Informe os dados do Usuário");
-                }
-                List<Claim> claims = new List<Claim>
-                {
-                    new Claim("Usuario", Convert.ToString(usuario.Login)),
-                    new Claim("Matriz", Convert.ToString(usuario.Matriz.CnpjCpf))
-                };
-
-                string? secretKey = _config.GetSection("JwtSettings:SecretKey").Value;
-                if (string.IsNullOrWhiteSpace(secretKey)) return new Resposta<string>("Chave de segurança não configurada");
-
-                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secretKey));
-                var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-                var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(1),
-                    signingCredentials: cred
-                );
-                var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-                return new Resposta<string>()
-                {
-                    Status      = true,
-                    Dados       = jwt,
-                    Mensagem    = "Token gerado com sucesso"
-                };
-            }
-            catch (Exception e)
-            {
-                return new Resposta<string>(mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte", logSuporte: e.Message);
             }
         }
 
@@ -126,7 +112,15 @@ namespace WebEtiqueta.Services
                     );
                 }
 
-                return new Resposta<bool>(senhaSuporte.Dados == senha);
+                UsuarioModel usuario = new UsuarioModel()
+                {
+                    Login = _config.GetSection("Suporte:LoginSuporte").Value,
+                    Senha = senhaSuporte.Dados,
+                };
+
+                if (!Util.CompararSenha(usuario, senha)) return new Resposta<bool>("Senha inválida");
+
+                return new Resposta<bool>(true);
             } catch (Exception e)
             {
                 return new Resposta<bool>(
@@ -134,19 +128,6 @@ namespace WebEtiqueta.Services
                     $"AuthService/ValidarSenhaSuporte: {e.Message}"
                 );
             }
-        }
-
-        private bool ComprarSenhaLogin(UsuarioModel usuario, string senha)
-        {
-            var hasher = new PasswordHasher<string>();
-            var senhaValida = hasher.VerifyHashedPassword(usuario.Login, usuario.Senha, senha);
-
-            if (senhaValida == PasswordVerificationResult.Success)
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }

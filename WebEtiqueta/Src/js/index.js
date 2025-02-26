@@ -2,9 +2,12 @@
 $(document).ready(function () {
     startConnection();
     $('.trim-input').on('blur', function () {
-        texto = $(this).val();
-        texto = texto.trim();
-        $(this).val(texto);
+        let text = $(this).val();
+        $(this).val(text.trim());
+    });
+
+    $('.intP-input').on('input', function () {
+        this.value = this.value.replace(/\D/g, '');
     });
 
     $('.collapse-item').on('click', function () {

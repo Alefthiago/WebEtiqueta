@@ -4,6 +4,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace WebEtiqueta.Migrations
 {
     /// <inheritdoc />
@@ -202,7 +204,11 @@ namespace WebEtiqueta.Migrations
             migrationBuilder.InsertData(
                 table: "MATRIZ",
                 columns: new[] { "MATRIZ_ID", "MATRIZ_CNPJ_CPF", "MATRIZ_NOME" },
-                values: new object[] { 1, "00000000000000", "Matriz" });
+                values: new object[,]
+                {
+                    { 1, "00000000000000", "MATRIZ" },
+                    { 2, "00748572000153", "ARMAZÉM FAVEIRO" }
+                });
 
             migrationBuilder.InsertData(
                 table: "NIVEL_ACESSO",
@@ -212,7 +218,12 @@ namespace WebEtiqueta.Migrations
             migrationBuilder.InsertData(
                 table: "USUARIO",
                 columns: new[] { "USUARIO_ID", "USUARIO_ELIMINADO", "USUARIO_ELIMINADO_DATA", "USUARIO_ELIMINADO_POR", "USUARIO_LOGIN", "USUARIO_MATRIZ_ID", "USUARIO_NIVEL_ACESSO_ID", "USUARIO_NOME", "USUARIO_SENHA" },
-                values: new object[] { 1, false, null, null, "suporte", 1, 1, "suporte", "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==" });
+                values: new object[,]
+                {
+                    { 1, false, null, null, "alef", 1, 1, "Alef", "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==" },
+                    { 2, false, null, null, "thiago", 1, 1, "Thiago", "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==" },
+                    { 3, false, null, null, "thiago", 2, 1, "Thiago", "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ETIQUETA_ETIQUETA_ELIMINADO_POR",

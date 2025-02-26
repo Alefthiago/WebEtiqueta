@@ -195,7 +195,13 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 1,
                             CnpjCpf = "00000000000000",
-                            Nome = "Matriz"
+                            Nome = "MATRIZ"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CnpjCpf = "00748572000153",
+                            Nome = "ARMAZÉM FAVEIRO"
                         });
                 });
 
@@ -372,10 +378,30 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 1,
                             Eliminado = false,
-                            Login = "suporte",
+                            Login = "alef",
                             MatrizId = 1,
                             NivelAcessoId = 1,
-                            Nome = "suporte",
+                            Nome = "Alef",
+                            Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Eliminado = false,
+                            Login = "thiago",
+                            MatrizId = 1,
+                            NivelAcessoId = 1,
+                            Nome = "Thiago",
+                            Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Eliminado = false,
+                            Login = "thiago",
+                            MatrizId = 2,
+                            NivelAcessoId = 1,
+                            Nome = "Thiago",
                             Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
                         });
                 });

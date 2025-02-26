@@ -97,8 +97,14 @@ namespace WebEtiqueta.Models
                 .HasData(
                     new MatrizModel { 
                         Id      = 1,
-                        Nome    = "Matriz",
+                        Nome    = "MATRIZ",
                         CnpjCpf = "00000000000000"
+                    },
+                    new MatrizModel
+                    {
+                        Id = 2,
+                        Nome = "ARMAZÉM FAVEIRO",
+                        CnpjCpf = "00748572000153"
                     }
                 );
             modelBuilder.Entity<NivelAcessoModel>()
@@ -124,12 +130,32 @@ namespace WebEtiqueta.Models
                 .HasData(
                     new UsuarioModel { 
                         Id              = 1,
-                        Nome            = "suporte",
-                        Login           = "suporte",
+                        Nome            = "Alef",
+                        Login           = "alef",
                         Senha           = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
                         MatrizId        = 1,
                         NivelAcessoId   = 1,
                         Eliminado       = false
+                    },
+                    new UsuarioModel
+                    {
+                        Id = 2,
+                        Nome = "Thiago",
+                        Login = "thiago",
+                        Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
+                        MatrizId = 1,
+                        NivelAcessoId = 1,
+                        Eliminado = false
+                    },
+                    new UsuarioModel
+                    {
+                        Id = 3,
+                        Nome = "Thiago",
+                        Login = "thiago",
+                        Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
+                        MatrizId = 2,
+                        NivelAcessoId = 1,
+                        Eliminado = false
                     }
                 );
         }

@@ -8,10 +8,12 @@ namespace WebEtiqueta.Controllers
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
+        private readonly IConfiguration _config;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService, IConfiguration config)
         {
             _authService = authService;
+            _config = config;
         }
 
         [HttpGet]
@@ -59,6 +61,7 @@ namespace WebEtiqueta.Controllers
         [HttpPost]
         public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha, string matrizCnpjCpf)
         {
+            //      VALIDAÇÃO BÁSICA.       //
             if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha) || string.IsNullOrWhiteSpace(matrizCnpjCpf))
             {
                 return StatusCode(400, new
@@ -67,10 +70,16 @@ namespace WebEtiqueta.Controllers
                     Mensagem    = "Todos os dados são obrigatórios"
                 });
             }
+            //     /VALIDAÇÃO BÁSICA.       //
 
             try
             {
-                Resposta<UsuarioModel> usuarioConsulta = await _authService.ValidarLogin(usuarioLogin.Trim().ToLower(), usuarioSenha.Trim().ToLower(), matrizCnpjCpf.Trim().ToLower());
+                Resposta<UsuarioModel> usuarioConsulta = await _authService.ValidarLogin(
+                    usuarioLogin.Trim().ToLower(),
+                    usuarioSenha.Trim().ToLower(),
+                    matrizCnpjCpf.Trim().ToLower()
+                );
+
                 if (!usuarioConsulta.Status)
                 {
                     return StatusCode(400, new
@@ -81,11 +90,20 @@ namespace WebEtiqueta.Controllers
                     });
                 }
 
-                if(usuarioConsulta.Dados != null || usuarioConsulta.Dados != default)
+                if (usuarioConsulta.Dados != null && usuarioConsulta.Dados != default)
                 {
                     UsuarioModel usuario = usuarioConsulta.Dados;
+                    string? secretKey = _config.GetSection("JwtSettings:SecretKey").Value;
+                    if(string.IsNullOrWhiteSpace(secretKey))
+                    {
+                        return StatusCode(400, new
+                        {
+                            Status = false,
+                            Mensagem = "Chave de segurança não configurada"
+                        });
+                    }
 
-                    Resposta<String> jwt = _authService.GerarJwtToken(usuario);
+                    Resposta<String> jwt = Jwt.GerarJwtToken(usuario, secretKey);
                     if (!jwt.Status)
                     {
                         return StatusCode(400, new
@@ -105,7 +123,7 @@ namespace WebEtiqueta.Controllers
                         });
                     }
 
-                    // Criando o cookie
+                    // CREIÇÃO DE COOKIE
                     Response.Cookies.Append("AuthToken", jwt.Dados, new CookieOptions
                     {
                         HttpOnly    = true,   // Protege contra acesso via JavaScript
@@ -114,7 +132,9 @@ namespace WebEtiqueta.Controllers
                         Expires     = DateTime.UtcNow.AddDays(1) // Tempo de expiração
                     });
 
-                    HttpContext.Session.SetString("Usuario", usuario.Login);
+                    // CRIAÇÃO DE SESSÃO
+                    //Console.WriteLine("")
+                    HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
                     HttpContext.Session.SetString("Matriz", usuario.Matriz.CnpjCpf);
 
                     return StatusCode(200, new
@@ -147,31 +167,31 @@ namespace WebEtiqueta.Controllers
             {
                 return StatusCode(400, new
                 {
-                    Status = false,
-                    Mensagem = "Senha obrigatória"
+                    Status      = false,
+                    Mensagem    = "Senha obrigatória"
                 });
             }
 
             try
             {
-                string senha = suporteSenha;
-                Resposta<bool> autorizado = _authService.ValidarSenhaSuporte(senha);
+                string senha                = suporteSenha;
 
+                Resposta<bool> autorizado   = _authService.ValidarSenhaSuporte(senha);
                 if (!autorizado.Status)
                 {
                     return StatusCode(400, new
                     {
-                        Status = autorizado.Status,
-                        Mensagem = autorizado.Mensagem,
-                        LogSuporte = autorizado.LogSuporte
+                        Status      = autorizado.Status,
+                        Mensagem    = autorizado.Mensagem,
+                        LogSuporte  = autorizado.LogSuporte
                     });
                 }
                 else if (!autorizado.Dados)
                 {
                     return StatusCode(402, new
                     {
-                        Status = false,
-                        Mensagem = "Acesso não autorizado"
+                        Status      = false,
+                        Mensagem    = "Acesso não autorizado"
                     });
                 }
 
@@ -181,9 +201,9 @@ namespace WebEtiqueta.Controllers
             {
                 return StatusCode(500, new
                 {
-                    Status = false,
-                    Mensagem = "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte",
-                    LogSuporte = $"AuthController/SenhaSuporte: {e.Message}"
+                    Status      = false,
+                    Mensagem    = "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte",
+                    LogSuporte  = $"AuthController/SenhaSuporte: {e.Message}"
                 });
             }
         }

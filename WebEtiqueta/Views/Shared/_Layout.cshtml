@@ -31,7 +31,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="background: #206BA5">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Home" asp-action="Index">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-area="" asp-controller="Etiqueta" asp-action="Index">
                 <!-- 
                     <div class="sidebar-brand-icon rotate-n-15">
                          <svg width="40" height="40" viewBox="0 0 182 182" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,7 +69,7 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <h6 class="collapse-header">Opções:</h6>
 
-                        <a class="collapse-item" asp-area="" asp-controller="Home" asp-action="Index">
+                        <a class="collapse-item" asp-area="" asp-controller="Etiqueta" asp-action="Index">
                             Imprimir
                         </a>
                         
@@ -171,13 +171,12 @@
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-
+ 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-
                        
                         <!-- Nav Item - Messages -->
-                        <li class="nav-item dropdown no-arrow mx-1" style="display:flex; justify-content:center; align-items: center;">
+                        <li class="nav-item dropdown no-arrow" style="display:flex; justify-content:center; align-items: center;">
                             <button id="qzTrayAlert" href="#" class="btn btn-secondary btn-icon-split">
                                 <span class="icon text-white-50" style="display:flex; justify-content:center; align-items: center;">
                                     <i id="qzTrayAlertIcon" class="fas fa-check" style="display:none"></i>
@@ -231,13 +230,29 @@
                 </nav>
                 <!-- End of Topbar -->
                 <section class="container-fluid">
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "Imprimir" : ViewContext.RouteData.Values["controller"]?.ToString())</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a asp-area="" asp-controller="@(ViewContext.RouteData.Values["controller"]?.ToString())" asp-action="Index">
+                                    @(ViewContext.RouteData.Values["controller"]?.ToString())
+                                </a>
+                            </li>
+                            @if (ViewContext.RouteData.Values["action"]?.ToString() != "Index")
+                            {
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    @(ViewContext.RouteData.Values["action"]?.ToString())
+                                </li>
+                            }
+                        </ol>
+                    </nav>
+                    <!--
+                    <div class="d-sm-flex align-items-center justify-content-end mb-4">
                         <a style="background: #206BA5" href="https://github.com/qzind/tray/releases/download/v2.2.4/qz-tray-2.2.4-x86_64.exe" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Baixar QZ Tray</a>
+                            <i class="fas fa-download fa-sm text-white-50"></i> Baixar QZ Tray
+                        </a>
                     </div>
-
-                    <div id="alertaPage" class="alert alert-alertaTipo bg-alertaTipo card-alert text-white shadow d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
+                    -->
+                    <div id="alertaPage" class="alert card-alert text-white shadow d-flex justify-content-between align-items-center" role="alert" style="opacity: 0">
                         <div>
                             <span id="alertaPageTexto"></span>
                             <i id="btnAbrirSuporteModal" href="#" class="fas fa-info-circle"></i>
@@ -323,6 +338,7 @@
     <script src="~/vendor/jquery/jquery.min.js"></script>
     <script src="~/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
+
     <!-- Core plugin JavaScript-->
     <script src="~/vendor/jquery-easing/jquery.easing.min.js"></script>
 
@@ -391,6 +407,16 @@
             }
         }
 
+        function abrirAlertaFormModal(idAlertaForm, msg) {
+            $(`#${idAlertaForm}`).css("display", "block");
+            $(`#${idAlertaForm}Texto`).text(msg);
+        }
+
+        function fecharAlertaFormModal(idAlertaForm) {
+            $(`#${idAlertaForm}`).css("display", "none");
+            $(`#${idAlertaForm}Texto`).text(null);
+        }
+
         function abrirAlertaFormSuporte(msg) {
             $alertaFormSuporte.css("display", "block");
             $alertaFormSuporteTexto.text(msg);
@@ -447,6 +473,9 @@
             //      CLICK.      //
             $btnFecharAlertaPage.click(()   => $alertaPage.css("opacity", 0));
             $btnAbrirSuporteModal.click(()  => $suporteModal.modal("show"));
+            $("#btnFecharAlertaModal").click(function () {
+                $(this).parent().parent().css("display", "none");
+            });
             //     /CLICK.      //
 
             //      SUBMIT.     //

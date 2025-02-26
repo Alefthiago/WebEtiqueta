@@ -12,15 +12,21 @@ namespace WebEtiqueta.Controllers
         private readonly ILogger<EtiquetaController> _logger;
         private readonly EtiquetaService _etiquetaService;
 
-        public EtiquetaController(ILogger<EtiquetaController> logger, IConfiguration configuration)
+        public EtiquetaController(ILogger<EtiquetaController> logger, IConfiguration configuration, EtiquetaService etiquetaService)
             : base(configuration)  // Passando a configuração corretamente
         {
             _logger = logger;
+            _etiquetaService = etiquetaService;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        public IActionResult Adicionar()
+        {
+            return View("Adicionar");
         }
 
         public IActionResult A4()

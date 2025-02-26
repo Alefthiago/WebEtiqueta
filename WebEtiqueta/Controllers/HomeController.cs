@@ -22,7 +22,7 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> Index()
         {
             //var dadosToken = (Dictionary<string, string>)HttpContext.Items["DadosToken"];
             //if(!etiquetas.status)

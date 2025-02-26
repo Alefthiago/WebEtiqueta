@@ -45,7 +45,7 @@ $(document).ready(function () {
                 return;
             }
 
-            window.location.href = `${BASE_URL}`;
+            location.href = `${BASE_URL}`;
         } catch (error)
         {
             console.error("Erro: ", error);

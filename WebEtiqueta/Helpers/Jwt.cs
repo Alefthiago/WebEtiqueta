@@ -1,6 +1,9 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.SignalR.Protocol;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
+using WebEtiqueta.Models;
 
 namespace WebEtiqueta.Helpers
 {
@@ -37,6 +40,44 @@ namespace WebEtiqueta.Helpers
             catch
             {
                 return false;
+            }
+        }
+
+        public static Resposta<String> GerarJwtToken(UsuarioModel usuario, string secretKey)
+        {
+            try
+            {
+                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Nome) || string.IsNullOrWhiteSpace(usuario.Matriz.CnpjCpf))
+                {
+                    return new Resposta<string>("Informe os dados do Usuário");
+                }
+                List<Claim> claims = new List<Claim>
+                {
+                    new Claim("UsuarioNome", Convert.ToString(usuario.Nome)),
+                    new Claim("Matriz", Convert.ToString(usuario.Matriz.CnpjCpf))
+                };
+
+                if (string.IsNullOrWhiteSpace(secretKey)) return new Resposta<string>("Chave de segurança não configurada");
+
+                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secretKey));
+                var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: cred
+                );
+                var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return new Resposta<string>()
+                {
+                    Status = true,
+                    Dados = jwt,
+                    Mensagem = "Token gerado com sucesso"
+                };
+            }
+            catch (Exception e)
+            {
+                return new Resposta<string>(mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte", logSuporte: e.Message);
             }
         }
     }
