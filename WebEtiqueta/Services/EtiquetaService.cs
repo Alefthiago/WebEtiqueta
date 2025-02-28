@@ -1,15 +1,39 @@
 ﻿using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 using WebEtiqueta.Repositorys;
+using WebEtiqueta.Models.Forms;
 
 namespace WebEtiqueta.Services
 {
     public class EtiquetaService
     {
         private readonly EtiquetaRepository _etiquetaRepository;
-        public EtiquetaService(EtiquetaRepository etiquetaRepository)
+        private readonly MatrizRepository _matrizRepository;
+        public EtiquetaService(EtiquetaRepository etiquetaRepository, MatrizRepository matrizRepository)
         {
             _etiquetaRepository = etiquetaRepository;
+            _matrizRepository = matrizRepository;
+        }
+
+        public async Task<Resposta<bool>> AdicionarEtiqueta (AdicionarEtiquetaViewModel form, string matriz)
+        {
+            try
+            {
+                if(string.IsNullOrWhiteSpace(matriz))
+                    return new Resposta<bool>("Matriz não encontrada");
+
+                Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(matriz);
+                if (consultaMatriz == null)
+                    return new Resposta<bool>("Matriz não encontrada");
+                else if (!consultaMatriz.Status)
+                    return new Resposta<bool>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
+
+
+            }
+            catch (Exception e)
+            {
+                
+            }
         }
 
         public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(Dictionary<string, string> dados)

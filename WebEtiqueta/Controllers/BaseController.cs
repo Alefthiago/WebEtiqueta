@@ -14,8 +14,8 @@ public class BaseController : Controller
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         var httpContext = context.HttpContext;
-        var request = httpContext.Request;
-        var session = httpContext.Session;
+        var request     = httpContext.Request;
+        var session     = httpContext.Session;
 
         // Verifica se o cookie "AuthToken" está presente na requisição
         if (request.Cookies.TryGetValue("AuthToken", out var token))
@@ -30,8 +30,8 @@ public class BaseController : Controller
                 if (dadosToken.TryGetValue("UsuarioNome", out var usuarioToken) && dadosToken.TryGetValue("Matriz", out var matriz))
                 {
                     // Obtém o nome de usuário armazenado na sessão
-                    var usuarioSessao = session.GetString("UsuarioNome");
-                    var matrizSessao = session.GetString("Matriz");
+                    var usuarioSessao   = session.GetString("UsuarioNome");
+                    var matrizSessao    = session.GetString("Matriz");
                     //Console.WriteLine($"Sessão-{usuarioSessao}");
                     //Console.WriteLine($"Token-{usuarioToken}");
                     // Se o usuário da sessão estiver vazio, define-o com o valor do token

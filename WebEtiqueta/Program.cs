@@ -14,11 +14,16 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<HomeService>();
 builder.Services.AddScoped<EtiquetaService>();
+builder.Services.AddScoped<FilialService>();
+builder.Services.AddScoped<MatrizService>();
+builder.Services.AddScoped<UsuarioService>();
 
-builder.Services.AddScoped<EtiquetaRepository>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<EtiquetaRepository>();
+builder.Services.AddScoped<FilialRepository>();
+builder.Services.AddScoped<MatrizRepository>();
+builder.Services.AddScoped<UsuarioRepository>();
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

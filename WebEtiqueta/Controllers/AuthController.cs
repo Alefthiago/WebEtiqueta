@@ -8,12 +8,14 @@ namespace WebEtiqueta.Controllers
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
+        private readonly MatrizService _matrizService;
         private readonly IConfiguration _config;
 
-        public AuthController(AuthService authService, IConfiguration config)
+        public AuthController(AuthService authService, IConfiguration config, MatrizService matrizService)
         {
             _authService = authService;
             _config = config;
+            _matrizService = matrizService;
         }
 
         [HttpGet]
@@ -23,7 +25,7 @@ namespace WebEtiqueta.Controllers
             {
                 try
                 {
-                    Resposta<MatrizModel> matriz = await _authService.PegarMatrizPorCnpjCpf(id);
+                    Resposta<MatrizModel> matriz = await _matrizService.PegarMatrizPorCnpjCpf(id);
                     if (!matriz.Status || matriz.Dados == default)
                     {
                         TempData["AlertaTipo"]      = "danger";
@@ -43,11 +45,8 @@ namespace WebEtiqueta.Controllers
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!";
                     TempData["LogSuporte"]      = $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}";
-
-                    return View("Login");
                 }
             }
-
             return View("Login");
         }
 

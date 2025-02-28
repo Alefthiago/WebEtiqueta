@@ -199,7 +199,7 @@
                                      @Context.Session.GetString("UsuarioNome")
                                 </span>
                                 <img class="img-profile rounded-circle"
-                                     src="img/undraw_profile.svg">
+                                     src="~/img/undraw_profile_2.svg"/>
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -302,31 +302,37 @@
         </div>
     </div>
 
-    <div class="modal fade" id="logSuporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="suporteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Log da Requisição</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Suporte</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Fechar">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    @if (!string.IsNullOrEmpty(TempData["AlertaLogSuporte"]?.ToString()))
-                    {
-                        <p id="alertaPageTexto">
-                            @TempData["AlertaLogSuporte"]
-                        </p>
-                    }
-                    else
-                    {
-                        <p>Nenhum log disponível.</p>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Ok</button>
-                </div>
+                <form id="formSuporte">
+                    <div id="divLogSuporte" style="display: none; padding: 10px">
+                        <p id="logSuporteTexto"></p>
+                    </div>
+
+                    <div id="divFormSuporte">
+                        <div id="alertaFormSuporte" class="alert alert-danger" role="alert" style="border-radius: 0px; display: none;">
+                            <span id="alertaFormSuporteTexto"></span>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <input type="password" class="form-control form-control-user trim-input"
+                                       id="suporteSenha" name="suporteSenha" placeholder="Senha">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input id="btnSuporteSenha" type="submit" class="btn btn-primary btn-user btn-block" value="Confirmar">
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -8,32 +8,15 @@ namespace WebEtiqueta.Services
     {
         private readonly IConfiguration _config;
         private readonly AuthRepository _authRepoistory;
-        public AuthService(IConfiguration config, AuthRepository authRepository)
-        {
-            _config = config;
-            _authRepoistory = authRepository;
-        }
+        private readonly MatrizRepository _matrizRepository;
+        private readonly UsuarioRepository _usuarioRepository;
 
-        public async Task<Resposta<MatrizModel>> PegarMatrizPorCnpjCpf(string cnpjCpf)
+        public AuthService(IConfiguration config, AuthRepository authRepository, MatrizRepository matrizRepository, UsuarioRepository usuarioRepository)
         {
-            if(string.IsNullOrWhiteSpace(cnpjCpf))
-                return new Resposta<MatrizModel>("CNPJ/CPF é obrigatório");
-
-            try
-            {
-                Resposta<MatrizModel>? matriz = await _authRepoistory.PegarMatrizPorCnpjCpf(cnpjCpf);
-                if(matriz == null)
-                    return new Resposta<MatrizModel>("Matriz não encontrada");
-                else
-                    return matriz;
-            }
-            catch (Exception e)
-            {
-                return new Resposta<MatrizModel>(
-                    "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!", 
-                    $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}"
-                );
-            }
+            _config             = config;
+            _authRepoistory     = authRepository;
+            _matrizRepository   = matrizRepository;
+            _usuarioRepository  = usuarioRepository;
         }
 
         public async Task<Resposta<UsuarioModel>> ValidarLogin(string login, string senha, string cnpjCpf)
@@ -49,7 +32,7 @@ namespace WebEtiqueta.Services
 
                 if (loginSuporte == login)
                 {
-                    Resposta<MatrizModel>? consultaMatriz = await _authRepoistory.PegarMatrizPorCnpjCpf(cnpjCpf);
+                    Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(cnpjCpf);
                     if (consultaMatriz == null) 
                         return new Resposta<UsuarioModel>("Matriz não encontrada");
                     else if (!consultaMatriz.Status) 
@@ -73,7 +56,7 @@ namespace WebEtiqueta.Services
                 }
                 else
                 {
-                    consultaUsuario = await _authRepoistory.PegarUsuarioPorLoginCnpjCpf(login, cnpjCpf);
+                    consultaUsuario = await _usuarioRepository.PegarUsuarioPorLoginCnpjCpf(login, cnpjCpf);
                     if (consultaUsuario == null) // consulta sem resultado
                         return new Resposta<UsuarioModel>("Dados Inválidos");
                     else if (!consultaUsuario.Status) // erro na consulta
