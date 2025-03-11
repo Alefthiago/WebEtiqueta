@@ -12,7 +12,7 @@ namespace WebEtiqueta.Controllers
         private readonly EtiquetaService _etiquetaService;
 
         public EtiquetaController(ILogger<EtiquetaController> logger, IConfiguration configuration, EtiquetaService etiquetaService)
-            : base(configuration)  // Passando a configuração corretamente
+            : base(configuration)
         {
             _logger = logger;
             _etiquetaService = etiquetaService;
@@ -45,7 +45,17 @@ namespace WebEtiqueta.Controllers
                 }
                 else
                 {
-                    string matriz = HttpContext.Session.GetString("Matriz");
+                    string? matriz = HttpContext.Session.GetString("Matriz");
+                    if (string.IsNullOrWhiteSpace(matriz))
+                    {
+                        TempData["AlertaTipo"]      = "danger";
+                        TempData["AlertaMensagem"]  = "Matriz não encontrada";
+
+                        Response.Cookies.Delete("AuthToken");
+                        HttpContext.Session.Clear();
+                        return RedirectToAction("Login", "Auth");
+                    }
+
                     Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, matriz);
                     
                     TempData["AlertaTipo"]      = etiquetaAdicionada.Status ? "success" : "danger";

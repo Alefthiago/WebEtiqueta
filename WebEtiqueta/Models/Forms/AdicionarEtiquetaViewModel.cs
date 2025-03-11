@@ -11,8 +11,8 @@ namespace WebEtiqueta.Models.Forms
         [Required(ErrorMessage = "Modelo é obrigatório")]
         [StringLength(50, ErrorMessage = "Modelo pode ter no máximo 50 caracteres")]
         public string Modelo { get; set; }
-        
-        public string Impressora { get; set; }
+
+        public string? Impressora { get; set; } = null;
 
         [Required(ErrorMessage = "Número de colunas é obrigatório")]
         [Range(1, int.MaxValue, ErrorMessage = "Número de colunas deve ser maior que zero")]

@@ -113,15 +113,25 @@
                         <h6 class="collapse-header">
                             Opções:
                         </h6>
-                        <a class="collapse-item" href="login.html">
-                            Usuários
-                        </a>
-                        <a class="collapse-item" href="register.html">
-                            Filiais
-                        </a>
-                        <a class="collapse-item" href="forgot-password.html">
-                            Etiquetas
-                        </a>
+                        @ViewBag.NivelAcesso.EditarUsuario
+                        @if (ViewBag.NivelAcesso.EditarUsuario)
+                        {
+                            <a class="collapse-item" href="login.html">
+                                Usuários
+                            </a>
+                        }
+                        @if(ViewBag.NivelAcesso.EditarFilial)
+                        {
+                            <a class="collapse-item" href="register.html">
+                                Filiais
+                            </a>
+                        }
+                        @if(ViewBag.NivelAcesso.EditarEtiqueta)
+                        {
+                            <a class="collapse-item" href="forgot-password.html">
+                                Etiquetas
+                            </a>
+                        }
                       </div>
                 </div>
             </li>
@@ -196,7 +206,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small text-capitalize">
-                                     @Context.Session.GetString("UsuarioNome")
+                                    @ViewBag.UsuarioNome
                                 </span>
                                 <img class="img-profile rounded-circle"
                                      src="~/img/undraw_profile_2.svg"/>
@@ -214,10 +224,13 @@
                                     Settings
                                 </a>
                                 -->
-                                <a class="dropdown-item" href="#">
-                                    <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    Logs
-                                </a>
+                                @if (ViewBag.NivelAcesso.Id == 2147483647)
+                                {
+                                    <a class="dropdown-item" href="#">
+                                        <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
+                                        Logs
+                                    </a>
+                                }
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>

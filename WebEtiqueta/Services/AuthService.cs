@@ -30,7 +30,7 @@ namespace WebEtiqueta.Services
                 if(string.IsNullOrWhiteSpace(loginSuporte) || string.IsNullOrWhiteSpace(senhaSuporte)) 
                     return new Resposta<UsuarioModel>("Dados de suporte não configurados");
 
-                if (loginSuporte == login)
+                if (loginSuporte == login) // Validação para usuário de suporte
                 {
                     Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(cnpjCpf);
                     if (consultaMatriz == null) 
@@ -46,6 +46,10 @@ namespace WebEtiqueta.Services
                         Matriz  = new MatrizModel()
                         {
                             CnpjCpf = cnpjCpf
+                        },
+                        NivelAcesso = new NivelAcessoModel()
+                        {
+                            Id = 2147483647
                         }
                     };
 
@@ -56,10 +60,10 @@ namespace WebEtiqueta.Services
                 }
                 else
                 {
-                    consultaUsuario = await _usuarioRepository.PegarUsuarioPorLoginCnpjCpf(login, cnpjCpf);
-                    if (consultaUsuario == null) // consulta sem resultado
+                    consultaUsuario = await _usuarioRepository.LoginUsuarioPorLoginCnpjCpf(login, cnpjCpf);
+                    if (consultaUsuario == null)
                         return new Resposta<UsuarioModel>("Dados Inválidos");
-                    else if (!consultaUsuario.Status) // erro na consulta
+                    else if (!consultaUsuario.Status)
                         return consultaUsuario;
 
                     if (!Util.CompararSenha(consultaUsuario.Dados, senha))

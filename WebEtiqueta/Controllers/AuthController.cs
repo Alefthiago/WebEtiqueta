@@ -92,6 +92,7 @@ namespace WebEtiqueta.Controllers
                 if (usuarioConsulta.Dados != null && usuarioConsulta.Dados != default)
                 {
                     UsuarioModel usuario = usuarioConsulta.Dados;
+
                     string? secretKey = _config.GetSection("JwtSettings:SecretKey").Value;
                     if(string.IsNullOrWhiteSpace(secretKey))
                     {
@@ -132,7 +133,9 @@ namespace WebEtiqueta.Controllers
                     });
 
                     // CRIAÇÃO DE SESSÃO
-                    //Console.WriteLine("")
+                    string nivelAcesso = System.Text.Json.JsonSerializer.Serialize(usuario.NivelAcesso);
+                    Console.WriteLine(nivelAcesso);
+                    HttpContext.Session.SetString("NivelAcesso", nivelAcesso);
                     HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
                     HttpContext.Session.SetString("Matriz", usuario.Matriz.CnpjCpf);
 

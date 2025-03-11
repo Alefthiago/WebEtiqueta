@@ -8,11 +8,13 @@
                         Etiquetas
                     </h6>
                 </div>
-                <a asp-area="" asp-controller="Etiqueta" asp-action="Adicionar" class="btn btn-info btn-circle">
-                    <i class="fas fa-plus"></i>
-                </a>
+                @if (ViewBag.NivelAcesso.AdicionarEtiqueta || ViewBag.NivelAcesso.Id == 2147483647)
+                {
+                    <a asp-area="" asp-controller="Etiqueta" asp-action="Adicionar" class="btn btn-info btn-circle">
+                        <i class="fas fa-plus"></i>
+                    </a>
+                }
             </div>
-
 
             <div class="card-body">
                 <div class="card shadow mb-4">

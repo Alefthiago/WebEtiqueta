@@ -25,6 +25,7 @@ builder.Services.AddScoped<FilialRepository>();
 builder.Services.AddScoped<MatrizRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
