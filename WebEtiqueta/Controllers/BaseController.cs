@@ -29,9 +29,9 @@ public class BaseController : Controller
         }
 
         // Obtém os valores da sessão antes de qualquer processamento
-        var usuarioSessao = session.GetString("UsuarioNome");
-        var matrizSessao = session.GetString("Matriz");
-        var niveisJson = session.GetString("NivelAcesso");
+        string? usuarioSessao = session.GetString("UsuarioLogin");
+        string? matrizSessao = session.GetString("Matriz");
+        string? niveisJson = session.GetString("NivelAcesso");
 
         // Se a sessão já contém os dados necessários, evita reprocessamento
         if (!string.IsNullOrEmpty(usuarioSessao) && !string.IsNullOrEmpty(matrizSessao) && !string.IsNullOrEmpty(niveisJson))
@@ -43,7 +43,7 @@ public class BaseController : Controller
 
         // Extrai os dados do token JWT
         var dadosToken = Jwt.DadosToken(token);
-        if (!dadosToken.TryGetValue("UsuarioNome", out var usuarioToken) ||
+        if (!dadosToken.TryGetValue("UsuarioLogin", out var usuarioToken) ||
             !dadosToken.TryGetValue("Matriz", out var matrizToken))
         {
             RedirecionarParaLogin(context);
@@ -57,7 +57,7 @@ public class BaseController : Controller
         if (consultaNivelAcesso.Status && consultaNivelAcesso.Dados != null)
         {
             niveisJson = JsonSerializer.Serialize(consultaNivelAcesso.Dados);
-            session.SetString("UsuarioNome", usuarioToken);
+            session.SetString("UsuarioLogin", usuarioToken);
             session.SetString("NivelAcesso", niveisJson);
             session.SetString("Matriz", matrizToken);
         }
@@ -76,7 +76,7 @@ public class BaseController : Controller
 
     private void DefinirViewData(string usuario, string matriz, string niveisJson)
     {
-        ViewBag.UsuarioNome = usuario;
+        ViewBag.UsuarioLogin = usuario;
         ViewBag.Matriz      = matriz;
         ViewBag.NivelAcesso = !string.IsNullOrEmpty(niveisJson)
             ? JsonSerializer.Deserialize<NivelAcessoModel>(niveisJson)

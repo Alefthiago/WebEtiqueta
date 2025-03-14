@@ -47,13 +47,13 @@ namespace WebEtiqueta.Helpers
         {
             try
             {
-                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Nome) || string.IsNullOrWhiteSpace(usuario.Matriz.CnpjCpf))
+                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Login) || string.IsNullOrWhiteSpace(usuario.Matriz.CnpjCpf))
                 {
                     return new Resposta<string>("Informe os dados do Usuário");
                 }
                 List<Claim> claims = new List<Claim>
                 {
-                    new Claim("UsuarioNome", Convert.ToString(usuario.Nome)),
+                    new Claim("UsuarioLogin", Convert.ToString(usuario.Login)),
                     new Claim("Matriz", Convert.ToString(usuario.Matriz.CnpjCpf))
                 };
 

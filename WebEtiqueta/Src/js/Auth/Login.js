@@ -24,7 +24,7 @@ $(document).ready(function () {
 
         try
         {
-            const requisicao = await fetch(`${BASE_URL}/Auth/ValidarLogin`, {
+            const requisicao = await fetch(`${BASE_URL}/Auth/LoginExe`, {
                 method: "POST",
                 body: formData
             });

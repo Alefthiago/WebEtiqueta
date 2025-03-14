@@ -3,6 +3,7 @@ using WebEtiqueta.Services;
 using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 using WebEtiqueta.Models.Forms;
+using System.Text.Json;
 
 namespace WebEtiqueta.Controllers
 {
@@ -10,12 +11,13 @@ namespace WebEtiqueta.Controllers
     {
         private readonly ILogger<EtiquetaController> _logger;
         private readonly EtiquetaService _etiquetaService;
-
+        private readonly IConfiguration _config;
         public EtiquetaController(ILogger<EtiquetaController> logger, IConfiguration configuration, EtiquetaService etiquetaService)
             : base(configuration)
         {
             _logger = logger;
             _etiquetaService = etiquetaService;
+            _config = configuration;
         }
 
         public IActionResult Index()
@@ -25,7 +27,37 @@ namespace WebEtiqueta.Controllers
 
         public IActionResult Adicionar()
         {
-            return View("Adicionar");
+            try
+            {
+
+                var resultado = ValidacoesPadrao.ValidarNivelAcesso(HttpContext, _config);
+
+                if (!resultado.Status)
+                {
+                    TempData["AlertaTipo"] = "danger";
+                    TempData["AlertaMensagem"] = resultado.Mensagem;
+                    return RedirectToAction("Login", "Auth");
+                }
+
+
+                NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(nivelAcessoSession);
+                if ((nivelAcesso != null && nivelAcesso.AdicionarEtiqueta))
+                {
+                    return View("Adicionar");
+                }
+                else
+                {
+                    TempData["AlertaTipo"]      = "danger";
+                    TempData["AlertaMensagem"]  = "Você não tem permissão para adicionar etiquetas";
+                    return RedirectToAction("Index");
+                }
+            } catch(Exception e)
+            {
+                TempData["AlertaTipo"]      = "danger";
+                TempData["AlertaMensagem"]  = "Erro inesperado ao acessar a página de adicionar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte";
+                TempData["LogSuporte"]      = $"EtiquetaController/Adicionar: {e.Message}";
+                return RedirectToAction("Index");
+            }
         }
         [HttpPost]
         public async Task<IActionResult> AdicionarExe(AdicionarEtiquetaViewModel form)
@@ -48,9 +80,7 @@ namespace WebEtiqueta.Controllers
                     string? matriz = HttpContext.Session.GetString("Matriz");
                     if (string.IsNullOrWhiteSpace(matriz))
                     {
-                        TempData["AlertaTipo"]      = "danger";
-                        TempData["AlertaMensagem"]  = "Matriz não encontrada";
-
+                        
                         Response.Cookies.Delete("AuthToken");
                         HttpContext.Session.Clear();
                         return RedirectToAction("Login", "Auth");

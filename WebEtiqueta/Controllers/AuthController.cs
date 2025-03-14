@@ -10,12 +10,14 @@ namespace WebEtiqueta.Controllers
         private readonly AuthService _authService;
         private readonly MatrizService _matrizService;
         private readonly IConfiguration _config;
+        protected string? _nivelAcessoSuporteId;
 
         public AuthController(AuthService authService, IConfiguration config, MatrizService matrizService)
         {
-            _authService = authService;
-            _config = config;
-            _matrizService = matrizService;
+            _authService            = authService;
+            _config                 = config;
+            _matrizService          = matrizService;
+            _nivelAcessoSuporteId   = _config.GetSection("Suporte:NivelAcessoId").Value;
         }
 
         [HttpGet]
@@ -58,7 +60,7 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ValidarLogin(String usuarioLogin, String usuarioSenha, string matrizCnpjCpf)
+        public async Task<IActionResult> LoginExe(String usuarioLogin, String usuarioSenha, string matrizCnpjCpf)
         {
             //      VALIDAÇÃO BÁSICA.       //
             if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha) || string.IsNullOrWhiteSpace(matrizCnpjCpf))
@@ -134,9 +136,9 @@ namespace WebEtiqueta.Controllers
 
                     // CRIAÇÃO DE SESSÃO
                     string nivelAcesso = System.Text.Json.JsonSerializer.Serialize(usuario.NivelAcesso);
-                    Console.WriteLine(nivelAcesso);
+                    //Console.WriteLine(nivelAcesso);
                     HttpContext.Session.SetString("NivelAcesso", nivelAcesso);
-                    HttpContext.Session.SetString("UsuarioNome", usuario.Nome);
+                    HttpContext.Session.SetString("UsuarioLogin", usuario.Login);
                     HttpContext.Session.SetString("Matriz", usuario.Matriz.CnpjCpf);
 
                     return StatusCode(200, new
