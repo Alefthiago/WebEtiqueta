@@ -6,6 +6,11 @@ $(document).ready(function () {
         $(this).val(text.trim());
     });
 
+    $('.intP-input').on('input', function () {
+        // mascara para somente numeros inteiros positivos
+        this.value = this.value.replace(/\D/g, '');
+    });
+
     $('.close-btn-alert').click(function () {
         $('.card-alert').removeClass('fade-in');
         $('.card-alert').addClass('fade-out');
@@ -16,12 +21,7 @@ $(document).ready(function () {
         e.preventDefault();
         $('#btnLogin').val('Carregando...').prop('disabled', true);
 
-        //$("#usuarioLogin").val(function (index, value) {
-        //    return value.toLowerCase();
-        //});
-
         let formData = new FormData(this);
-
         try
         {
             const requisicao = await fetch(`${BASE_URL}/Auth/LoginExe`, {

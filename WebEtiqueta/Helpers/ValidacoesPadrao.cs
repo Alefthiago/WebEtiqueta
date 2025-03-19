@@ -13,40 +13,26 @@ namespace WebEtiqueta.Helpers
                 var session = httpContext.Session;
                 var response = httpContext.Response;
 
-                // Obtém o nível de acesso da sessão
                 string? nivelAcessoSession = session.GetString("NivelAcesso");
-
                 if (string.IsNullOrWhiteSpace(nivelAcessoSession))
                 {
-                    response.Cookies.Delete("AuthToken");
-                    session.Clear();
-                    return new Resposta<bool>
-                    {
-                        Status      = false,
-                        Mensagem    = "Nível de acesso não encontrado, faça o login novamente."
-                    };
+                    return new Resposta<bool>("Nível de acesso não encontrado, faça o login novamente");
                 }
 
-                // Obtém o nível de acesso do suporte a partir do appsettings.json
                 string? nivelAcessoIdSuporte = config.GetSection("Suporte:NivelAcessoId").Value;
                 if (string.IsNullOrWhiteSpace(nivelAcessoIdSuporte))
                 {
-                    return new Resposta<bool>
-                    {
-                        Status      = false,
-                        Mensagem    = "Nível de acesso de suporte não configurado, entre em contato com o suporte."
-                    };
+                    return new Resposta<bool>("Nível de acesso de suporte não configurado");
                 }
 
-                return new Resposta<bool> { Status = true };
+                return new Resposta<bool>(true);
             }
             catch (Exception e)
             {
-                return new Resposta<bool>
-                {
-                    Status = false,
-                    Mensagem = "Erro ao validar nível de acesso: " + e.Message
-                };
+                return new Resposta<bool>(
+                    "Erro ao validar nível de acesso, tente novamente mais tarde ou entre em contato com o suporte",
+                    $"ValidacoesPadrao/ValidarNivelAcesso: {e.Message}"
+                );
             }
         }
     }

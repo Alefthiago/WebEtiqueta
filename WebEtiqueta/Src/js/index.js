@@ -1,12 +1,13 @@
 ﻿import { startConnection } from '../helperJs/QzTrayConfig.js';
 $(document).ready(function () {
-    startConnection();
+    //startConnection();
     $('.trim-input').on('blur', function () {
         let text = $(this).val();
         $(this).val(text.trim());
     });
 
     $('.intP-input').on('input', function () {
+        // mascara para somente numeros inteiros positivos
         this.value = this.value.replace(/\D/g, '');
     });
 

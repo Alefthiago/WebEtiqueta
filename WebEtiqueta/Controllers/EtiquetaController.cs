@@ -4,6 +4,8 @@ using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 using WebEtiqueta.Models.Forms;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 namespace WebEtiqueta.Controllers
 {
@@ -29,9 +31,8 @@ namespace WebEtiqueta.Controllers
         {
             try
             {
-
+                //      VALIDAÇÃO DE NÍVEL DE ACESSO.       //
                 var resultado = ValidacoesPadrao.ValidarNivelAcesso(HttpContext, _config);
-
                 if (!resultado.Status)
                 {
                     TempData["AlertaTipo"] = "danger";
@@ -40,8 +41,8 @@ namespace WebEtiqueta.Controllers
                 }
 
 
-                NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(nivelAcessoSession);
-                if ((nivelAcesso != null && nivelAcesso.AdicionarEtiqueta))
+                NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
+                if (nivelAcesso != null && (nivelAcesso.AdicionarEtiqueta || nivelAcesso.Id == int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value)))
                 {
                     return View("Adicionar");
                 }
@@ -51,7 +52,9 @@ namespace WebEtiqueta.Controllers
                     TempData["AlertaMensagem"]  = "Você não tem permissão para adicionar etiquetas";
                     return RedirectToAction("Index");
                 }
-            } catch(Exception e)
+                //     /VALIDAÇÃO DE NÍVEL DE ACESSO.       //
+            }
+            catch (Exception e)
             {
                 TempData["AlertaTipo"]      = "danger";
                 TempData["AlertaMensagem"]  = "Erro inesperado ao acessar a página de adicionar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte";
@@ -64,8 +67,28 @@ namespace WebEtiqueta.Controllers
         {
             try
             {
+                //      VALIDAÇÃO DE NÍVEL DE ACESSO.       //
+                Resposta<bool> nivelAcessoValidado = ValidacoesPadrao.ValidarNivelAcesso(HttpContext, _config);
+                if (!nivelAcessoValidado.Status)
+                {
+                    TempData["AlertaTipo"]      = "danger";
+                    TempData["AlertaMensagem"]  = nivelAcessoValidado.Mensagem;
+                    TempData["LogSuporte"]      = nivelAcessoValidado.LogSuporte ?? null;
+                    return RedirectToAction("Login", "Auth");
+                }
+
+                NivelAcessoModel? nivelAcesso = JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
+                if (nivelAcesso.Id != int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value) && !nivelAcesso.AdicionarEtiqueta)
+                {
+                    TempData["AlertaTipo"]      = "danger";
+                    TempData["AlertaMensagem"]  = "Você não tem permissão para adicionar etiquetas";
+                    return RedirectToAction("Index");
+                }
+                //     /VALIDAÇÃO DE NÍVEL DE ACESSO.       //
+
                 if (!ModelState.IsValid)
                 {
+                    //     VALIDAÇÃO DE FORMULÁRIO.     //
                     var erros = ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)
@@ -74,19 +97,11 @@ namespace WebEtiqueta.Controllers
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = erros;
                     return RedirectToAction("Adicionar");
+                    //    /VALIDAÇÃO DE FORMULÁRIO.     //
                 }
                 else
                 {
-                    string? matriz = HttpContext.Session.GetString("Matriz");
-                    if (string.IsNullOrWhiteSpace(matriz))
-                    {
-                        
-                        Response.Cookies.Delete("AuthToken");
-                        HttpContext.Session.Clear();
-                        return RedirectToAction("Login", "Auth");
-                    }
-
-                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, matriz);
+                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, "askdçjasdklj");
                     
                     TempData["AlertaTipo"]      = etiquetaAdicionada.Status ? "success" : "danger";
                     TempData["AlertaMensagem"]  = etiquetaAdicionada.Mensagem;

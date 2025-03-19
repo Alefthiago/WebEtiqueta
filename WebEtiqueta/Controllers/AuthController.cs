@@ -27,6 +27,13 @@ namespace WebEtiqueta.Controllers
             {
                 try
                 {
+                    if(!Util.ValidaDocumento(id))
+                    {
+                        TempData["AlertaTipo"] = "danger";
+                        TempData["AlertaMensagem"] = "CNPJ/CPF inválido";
+                        return View("Login");
+                    }
+
                     Resposta<MatrizModel> matriz = await _matrizService.PegarMatrizPorCnpjCpf(id);
                     if (!matriz.Status || matriz.Dados == default)
                     {
