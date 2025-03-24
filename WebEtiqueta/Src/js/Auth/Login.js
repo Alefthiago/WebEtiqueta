@@ -1,5 +1,4 @@
 ﻿const BASE_URL = window.location.origin;
-
 $(document).ready(function () {
     $('.trim-input').on('blur', function () {
         let text = $(this).val();

@@ -26,17 +26,27 @@
                             <label for="modelo" class="col-form-label">
                                 Modelo:<span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control trim-input" id="modelo" name="Modelo" required/>
+                            <select class="form-control" id="modelo" name="Modelo" required>
+                                <option value="gondola" selected>Gôndola</option>
+                                <option value="a4">A4</option>
+                            </select>
+                            <!--
+                                <input type="text" class="form-control trim-input" id="modelo" name="Modelo"  required/>
+                            -->
                         </div>
 
                         <div class="form-group">
-                            <label for="impressora" class="col-form-label">
-                                Impressora:
-                                <!--
+                            <label for="tipo" class="col-form-label">
+                                Tipo:
                                    <span class="text-danger">*</span>
-                                -->
                             </label>
-                            <input type="text" class="form-control trim-input" id="impressora" name="Impressora"/>
+                            <select class="form-control" id="tipo" name="Tipo" required>
+                                <option value="produto" selected>Produto</option>
+                                <option value="cliente">Cliente</option>
+                            </select>
+                            <!--
+                                <input type="text" class="form-control trim-input" id="base" name="Base"/>
+                            -->
                         </div>
 
                         <div class="row">

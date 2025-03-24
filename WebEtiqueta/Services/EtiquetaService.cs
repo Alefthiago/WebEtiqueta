@@ -17,24 +17,25 @@ namespace WebEtiqueta.Services
 
         public async Task<Resposta<bool>> AdicionarEtiqueta (AdicionarEtiquetaViewModel form, string matriz)
         {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(matriz))
+                    return new Resposta<bool>("Matriz não encontrada");
+
+                Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(matriz);
+                if (consultaMatriz == null)
+                    return new Resposta<bool>("Matriz não encontrada");
+                else if (!consultaMatriz.Status)
+                    return new Resposta<bool>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
+
+
+            }
+            catch (Exception e)
+            {
+
+            }
             return new Resposta<bool>("Em desenvolvimento");
-            //try
-            //{
-            //    if(string.IsNullOrWhiteSpace(matriz))
-            //        return new Resposta<bool>("Matriz não encontrada");
 
-            //    Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(matriz);
-            //    if (consultaMatriz == null)
-            //        return new Resposta<bool>("Matriz não encontrada");
-            //    else if (!consultaMatriz.Status)
-            //        return new Resposta<bool>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
-
-
-            //}
-            //catch (Exception e)
-            //{
-
-            //}
         }
 
         public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(Dictionary<string, string> dados)

@@ -45,10 +45,10 @@ namespace WebEtiqueta.Models
         [Required]
         public int EspacoY { get; set; }
 
-        [Column("ETIQUETA_IMPRESSORA")]
+        [Column("ETIQUETA_TIPO")]
         [StringLength(50)]
         [Required]
-        public string Impressora { get; set; }
+        public string Tipo { get; set; }
 
         [Column("ETIQUETA_ELIMINADO")]
         [Required]

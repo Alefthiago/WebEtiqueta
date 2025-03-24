@@ -39,8 +39,6 @@ namespace WebEtiqueta.Controllers
                     TempData["AlertaMensagem"] = resultado.Mensagem;
                     return RedirectToAction("Login", "Auth");
                 }
-
-
                 NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
                 if (nivelAcesso != null && (nivelAcesso.AdicionarEtiqueta || nivelAcesso.Id == int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value)))
                 {
