@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebEtiqueta.Models;
@@ -11,9 +12,11 @@ using WebEtiqueta.Models;
 namespace WebEtiqueta.Migrations
 {
     [DbContext(typeof(Contexto))]
-    partial class ContextoModelSnapshot : ModelSnapshot
+    [Migration("20250325121113_atualizaBase")]
+    partial class atualizaBase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,15 +115,9 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("DISPONIVEL");
 
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("MATRIZ_ID");
-
                     b.HasKey("FilialId", "EtiquetaId");
 
                     b.HasIndex("EtiquetaId");
-
-                    b.HasIndex("MatrizId");
 
                     b.ToTable("FILIAL_ETIQUETA");
                 });
@@ -443,17 +440,9 @@ namespace WebEtiqueta.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
-                        .WithMany()
-                        .HasForeignKey("MatrizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Etiqueta");
 
                     b.Navigation("Filial");
-
-                    b.Navigation("Matriz");
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.FilialModel", b =>

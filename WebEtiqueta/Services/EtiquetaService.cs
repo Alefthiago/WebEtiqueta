@@ -28,14 +28,25 @@ namespace WebEtiqueta.Services
                 else if (!consultaMatriz.Status)
                     return new Resposta<bool>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
 
+                Resposta<bool>? etiqueta = await _etiquetaRepository.Adicionar(form, consultaMatriz.Dados);
 
+                if(etiqueta == null)
+                    return new Resposta<bool>("Erro inesperado ao adicionar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte");
+                else if (!etiqueta.Status)
+                    return new Resposta<bool>(etiqueta.Mensagem ?? "Não foi possível adicionar a etiqueta", etiqueta.LogSuporte);
+
+                return new Resposta<bool>(
+                    true,
+                    "Etiqueta adicionada com sucesso"
+                );
             }
             catch (Exception e)
             {
-
+                return new Resposta<bool>(
+                    "Erro inesperado ao adicionar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    $"EtiquetaService/AdicionarEtiqueta: {e.Message}"
+                );
             }
-            return new Resposta<bool>("Em desenvolvimento");
-
         }
 
         public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(Dictionary<string, string> dados)

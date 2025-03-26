@@ -113,24 +113,33 @@
                         <h6 class="collapse-header">
                             Opções:
                         </h6>
-                        @if (ViewBag.NivelAcesso.EditarUsuario)
-                        {
-                            <a class="collapse-item" href="login.html">
-                                Usuários
-                            </a>
-                        }
-                        @if(ViewBag.NivelAcesso.EditarFilial)
-                        {
-                            <a class="collapse-item" href="register.html">
-                                Filiais
-                            </a>
-                        }
-                        @if(ViewBag.NivelAcesso.EditarEtiqueta)
-                        {
-                            <a class="collapse-item" href="forgot-password.html">
-                                Etiquetas
-                            </a>
-                        }
+                        <!--
+                            @if (ViewBag.NivelAcesso.EditarUsuario || ViewBag.NivelAcesso.Id == ViewBag.NivelAcessoSuporteId)
+                            {
+                                <a class="collapse-item" href="login.html">
+                                    Usuários
+                                </a>
+                            }
+                            @if (ViewBag.NivelAcesso.EditarFilial || ViewBag.NivelAcesso.Id == ViewBag.NivelAcessoSuporteId)
+                            {
+                                <a class="collapse-item" href="register.html">
+                                    Filiais
+                                </a>
+                            }
+                            @if (ViewBag.NivelAcesso.EditarEtiqueta || ViewBag.NivelAcesso.Id == ViewBag.NivelAcessoSuporteId)
+                            {
+                                <a class="collapse-item" href="forgot-password.html">
+                                    Etiquetas
+                                </a>
+                            }
+                        -->
+                        <a class="collapse-item" asp-area="" asp-controller="Usuario" asp-action="Index">
+                            Usuários
+                        </a>
+
+                        <a class="collapse-item" asp-area="" asp-controller="Filial" asp-action="Index">
+                            Filiais
+                        </a>
                       </div>
                 </div>
             </li>

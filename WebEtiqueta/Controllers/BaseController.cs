@@ -17,9 +17,9 @@ public class BaseController : Controller
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var httpContext = context.HttpContext;
-        var request = httpContext.Request;
-        var response = httpContext.Response;
-        var session = httpContext.Session;
+        var request     = httpContext.Request;
+        var response    = httpContext.Response;
+        var session     = httpContext.Session;
 
         // Verifica se o cookie "AuthToken" existe e se é válido
         if (!request.Cookies.TryGetValue("AuthToken", out var token) || !Jwt.ValidarJwtToken(token, _configuration))
@@ -76,11 +76,12 @@ public class BaseController : Controller
 
     private void DefinirViewData(string usuario, string matriz, string niveisJson)
     {
-        ViewBag.UsuarioLogin = usuario;
-        ViewBag.Matriz      = matriz;
-        ViewBag.NivelAcesso = !string.IsNullOrEmpty(niveisJson)
+        ViewBag.UsuarioLogin    = usuario;
+        ViewBag.Matriz          = matriz;
+        ViewBag.NivelAcesso     = !string.IsNullOrEmpty(niveisJson)
             ? JsonSerializer.Deserialize<NivelAcessoModel>(niveisJson)
             : new NivelAcessoModel();
+        ViewBag.NivelAcessoSuporteId = int.Parse(_configuration.GetSection("Suporte:NivelAcessoId").Value);
     }
 
     private void RedirecionarParaLogin(ActionExecutingContext context)

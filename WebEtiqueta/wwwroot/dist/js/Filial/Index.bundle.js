@@ -1,0 +1,1 @@
+(()=>{"use strict";alert("Filial index.js")})();

@@ -4,8 +4,6 @@ using WebEtiqueta.Helpers;
 using WebEtiqueta.Models;
 using WebEtiqueta.Models.Forms;
 using System.Text.Json;
-using Microsoft.AspNetCore.Http;
-using System.Net.Http;
 
 namespace WebEtiqueta.Controllers
 {
@@ -35,8 +33,8 @@ namespace WebEtiqueta.Controllers
                 var resultado = ValidacoesPadrao.ValidarNivelAcesso(HttpContext, _config);
                 if (!resultado.Status)
                 {
-                    TempData["AlertaTipo"] = "danger";
-                    TempData["AlertaMensagem"] = resultado.Mensagem;
+                    TempData["AlertaTipo"]      = "danger";
+                    TempData["AlertaMensagem"]  = resultado.Mensagem;
                     return RedirectToAction("Login", "Auth");
                 }
                 NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
@@ -72,7 +70,7 @@ namespace WebEtiqueta.Controllers
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = nivelAcessoValidado.Mensagem;
                     TempData["LogSuporte"]      = nivelAcessoValidado.LogSuporte ?? null;
-                    return RedirectToAction("Login", "Auth");
+                    return RedirectToAction("Logout", "Auth");
                 }
 
                 NivelAcessoModel? nivelAcesso = JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
@@ -80,7 +78,7 @@ namespace WebEtiqueta.Controllers
                 {
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = "Você não tem permissão para adicionar etiquetas";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Logout", "Auth");
                 }
                 //     /VALIDAÇÃO DE NÍVEL DE ACESSO.       //
 
@@ -99,8 +97,16 @@ namespace WebEtiqueta.Controllers
                 }
                 else
                 {
-                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, "askdçjasdklj");
+                    String? matriz = HttpContext.Session.GetString("Matriz");
+                    if (string.IsNullOrWhiteSpace(matriz))
+                    {
+                        TempData["AlertaTipo"]      = "danger";
+                        TempData["AlertaMensagem"]  = "Matriz não encontrada, realize o login novamente";
+                        return RedirectToAction("Logout", "Auth");
+                    }
                     
+                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, matriz);
+
                     TempData["AlertaTipo"]      = etiquetaAdicionada.Status ? "success" : "danger";
                     TempData["AlertaMensagem"]  = etiquetaAdicionada.Mensagem;
                     TempData["LogSuporte"]      = etiquetaAdicionada.LogSuporte;

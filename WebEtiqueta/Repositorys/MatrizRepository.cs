@@ -23,9 +23,7 @@ namespace WebEtiqueta.Repositorys
                 if (resultado != null)
                 {
                     if (!string.IsNullOrWhiteSpace(resultado.Nome) && !string.IsNullOrWhiteSpace(resultado.CnpjCpf))
-                    {
                         return new Resposta<MatrizModel>(resultado);
-                    }
                 }
 
                 return null;

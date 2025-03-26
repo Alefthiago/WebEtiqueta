@@ -14,7 +14,12 @@ namespace WebEtiqueta.Models
         [Column("FILIAL_ID")]
         public int FilialId { get; set; }
         public FilialModel Filial { get; set; }
-        
+
+        [Required]
+        [Column("MATRIZ_ID")]
+        public int MatrizId { get; set; }
+        public MatrizModel Matriz { get; set; }
+
         [Required]
         [Column("ETIQUETA_ID")]
         public int EtiquetaId { get; set; }
