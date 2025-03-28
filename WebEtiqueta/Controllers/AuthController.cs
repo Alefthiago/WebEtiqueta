@@ -8,15 +8,15 @@ namespace WebEtiqueta.Controllers
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
-        private readonly MatrizService _matrizService;
+        private readonly EmpresaService _EmpresaService;
         private readonly IConfiguration _config;
         protected string? _nivelAcessoSuporteId;
 
-        public AuthController(AuthService authService, IConfiguration config, MatrizService matrizService)
+        public AuthController(AuthService authService, IConfiguration config, EmpresaService empresaService)
         {
             _authService            = authService;
             _config                 = config;
-            _matrizService          = matrizService;
+            _EmpresaService          = empresaService;
             _nivelAcessoSuporteId   = _config.GetSection("Suporte:NivelAcessoId").Value;
         }
 
@@ -34,26 +34,26 @@ namespace WebEtiqueta.Controllers
                         return View("Login");
                     }
 
-                    Resposta<MatrizModel> matriz = await _matrizService.PegarMatrizPorCnpjCpf(id);
-                    if (!matriz.Status || matriz.Dados == default)
+                    Resposta<EmpresaModel> empresa = await _EmpresaService.PegarEmpresaPorCnpjCpf(id);
+                    if (!empresa.Status || empresa.Dados == default)
                     {
                         TempData["AlertaTipo"]      = "danger";
-                        TempData["AlertaMensagem"]  = matriz.Mensagem ?? "Não foi possível carregar os dados";
-                        TempData["LogSuporte"]      = matriz.LogSuporte;
+                        TempData["AlertaMensagem"]  = empresa.Mensagem ?? "Não foi possível carregar os dados";
+                        TempData["LogSuporte"]      = empresa.LogSuporte;
                     } else
                     {
-                        ViewBag.Matriz = new
+                        ViewBag.Empresa = new
                         {
-                            Nome    = matriz.Dados.Nome,
-                            CnpjCpf = matriz.Dados.CnpjCpf
+                            Nome    = empresa.Dados.Nome,
+                            CnpjCpf = empresa.Dados.CnpjCpf
                         };
                     }
                 }
                 catch (Exception e)
                 {
                     TempData["AlertaTipo"]      = "danger";
-                    TempData["AlertaMensagem"]  = "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!";
-                    TempData["LogSuporte"]      = $"AuthService/PegarMatrizPorCnpjCpf: {e.Message}";
+                    TempData["AlertaMensagem"]  = "Erro ao buscar empresa, tente novamente mais tarde ou entre em contato com o suporte!";
+                    TempData["LogSuporte"]      = $"AuthService/PegarEmpresaPorCnpjCpf: {e.Message}";
                 }
             }
             return View("Login");
@@ -67,10 +67,10 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginExe(String usuarioLogin, String usuarioSenha, string matrizCnpjCpf)
+        public async Task<IActionResult> LoginExe(String usuarioLogin, String usuarioSenha, string empresaCnpjCpf)
         {
             //      VALIDAÇÃO BÁSICA.       //
-            if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha) || string.IsNullOrWhiteSpace(matrizCnpjCpf))
+            if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrWhiteSpace(usuarioSenha) || string.IsNullOrWhiteSpace(empresaCnpjCpf))
             {
                 return StatusCode(400, new
                 {
@@ -85,7 +85,7 @@ namespace WebEtiqueta.Controllers
                 Resposta<UsuarioModel> usuarioConsulta = await _authService.ValidarLogin(
                     usuarioLogin.Trim().ToLower(),
                     usuarioSenha.Trim().ToLower(),
-                    matrizCnpjCpf.Trim().ToLower()
+                    empresaCnpjCpf.Trim().ToLower()
                 );
 
                 if (!usuarioConsulta.Status)
@@ -146,7 +146,7 @@ namespace WebEtiqueta.Controllers
                     //Console.WriteLine(nivelAcesso);
                     HttpContext.Session.SetString("NivelAcesso", nivelAcesso);
                     HttpContext.Session.SetString("UsuarioLogin", usuario.Login);
-                    HttpContext.Session.SetString("Matriz", usuario.Matriz.CnpjCpf);
+                    HttpContext.Session.SetString("Empresa", usuario.Empresa.CnpjCpf);
 
                     return StatusCode(200, new
                     {

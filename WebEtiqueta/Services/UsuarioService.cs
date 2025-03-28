@@ -13,14 +13,14 @@ namespace WebEtiqueta.Services
             _usuarioRepository = usuarioRepository;
         }
 
-        public async Task<Resposta<NivelAcessoModel>> PegarNivelAcessoPorUsuario(string usuario, string matriz)
+        public async Task<Resposta<NivelAcessoModel>> PegarNivelAcessoPorUsuario(string usuario, string empresa)
         {
             try
             {
-                if(string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(matriz))
-                    return new Resposta<NivelAcessoModel>("Usuário ou matriz não informados!");
+                if(string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(empresa))
+                    return new Resposta<NivelAcessoModel>("Usuário ou empresa não informados!");
 
-                Resposta<NivelAcessoModel>? nivelAcesso = await _usuarioRepository.PegarNivelAcessoPorUsuario(usuario, matriz);
+                Resposta<NivelAcessoModel>? nivelAcesso = await _usuarioRepository.PegarNivelAcessoPorUsuario(usuario, empresa);
                 if(nivelAcesso == null)
                     return new Resposta<NivelAcessoModel>("Erro ao buscar nível de acesso!");
                 else if (!nivelAcesso.Status)

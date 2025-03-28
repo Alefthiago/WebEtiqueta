@@ -35,9 +35,9 @@ namespace WebEtiqueta.Models
 
         //      RELACIONAMENTOS.     //
         [Required]
-        [Column("USUARIO_MATRIZ_ID")]
-        public int MatrizId { get; set; }
-        public MatrizModel Matriz { get; set; }
+        [Column("USUARIO_EMPRESA_ID")]
+        public int EmpresaId { get; set; }
+        public EmpresaModel Empresa { get; set; }
 
         [Required]
         [Column("USUARIO_NIVEL_ACESSO_ID")]
@@ -51,9 +51,7 @@ namespace WebEtiqueta.Models
         public int? EliminadoPor { get; set; }
         public UsuarioModel? Eliminador { get; set; }
 
-        public ICollection<UsuarioFilialModel> Filiais { get; set; }
         public ICollection<EtiquetaModel> EtiquetasEliminadas { get; set; }
-        public ICollection<FilialModel> FiliaisEliminadas { get; set; }
         public ICollection<UsuarioModel> UsuariosEliminados { get; set; }
         public ICollection<NivelAcessoModel> NiveisAcessoEliminados { get; set; }
         //      RELACIONAMENTOS.     //

@@ -8,14 +8,14 @@ namespace WebEtiqueta.Services
     {
         private readonly IConfiguration _config;
         private readonly AuthRepository _authRepoistory;
-        private readonly MatrizRepository _matrizRepository;
+        private readonly EmpresaRepository _empresaRepository;
         private readonly UsuarioRepository _usuarioRepository;
 
-        public AuthService(IConfiguration config, AuthRepository authRepository, MatrizRepository matrizRepository, UsuarioRepository usuarioRepository)
+        public AuthService(IConfiguration config, AuthRepository authRepository, EmpresaRepository empresaRepository, UsuarioRepository usuarioRepository)
         {
             _config             = config;
             _authRepoistory     = authRepository;
-            _matrizRepository   = matrizRepository;
+            _empresaRepository   = empresaRepository;
             _usuarioRepository  = usuarioRepository;
         }
 
@@ -32,24 +32,24 @@ namespace WebEtiqueta.Services
 
                 if (loginSuporte == login) // Validação para usuário de suporte
                 {
-                    Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(cnpjCpf);
-                    if (consultaMatriz == null) 
-                        return new Resposta<UsuarioModel>("Matriz não encontrada");
-                    else if (!consultaMatriz.Status) 
-                        return new Resposta<UsuarioModel>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
+                    Resposta<EmpresaModel>? consultaEmpresa = await _empresaRepository.PegarEmpresaPorCnpjCpf(cnpjCpf);
+                    if (consultaEmpresa == null) 
+                        return new Resposta<UsuarioModel>("Empresa não encontrada");
+                    else if (!consultaEmpresa.Status) 
+                        return new Resposta<UsuarioModel>(consultaEmpresa.Mensagem ?? "Não foi possível carregar os dados da empresa", consultaEmpresa.LogSuporte);
 
                     UsuarioModel usuarioSuporte = new UsuarioModel()
                     {
                         Login   = loginSuporte,
                         Nome    = loginSuporte,
                         Senha   = senhaSuporte,
-                        Matriz  = new MatrizModel()
+                        Empresa  = new EmpresaModel()
                         {
                             CnpjCpf = cnpjCpf
                         },
                         NivelAcesso = new NivelAcessoModel()
                         {
-                            Id = 2147483647
+                            Id = 2147483647 //ajustar suporte
                         }
                     };
 

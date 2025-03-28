@@ -2,7 +2,7 @@
 
 namespace WebEtiqueta.Controllers
 {
-    public class MatrizController : Controller
+    public class EmpresaController : Controller
     {
         public IActionResult Index()
         {

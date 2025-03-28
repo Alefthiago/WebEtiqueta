@@ -14,7 +14,7 @@ namespace WebEtiqueta.Repositorys
             _contexto = contexto;
         }
 
-        public async Task<Resposta<bool>?> Adicionar(AdicionarEtiquetaViewModel form, MatrizModel matriz)
+        public async Task<Resposta<bool>?> Adicionar(AdicionarEtiquetaViewModel form, EmpresaModel empresa)
         {
             using (var transaction = await _contexto.Database.BeginTransactionAsync())
             {
@@ -34,35 +34,13 @@ namespace WebEtiqueta.Repositorys
                         Eliminado       = false,
                         EliminadoData   = null,
                         EliminadoPor    = null,
-                        MatrizId        = matriz.Id
+                        EmpresaId        = empresa.Id
                     };
                 
                     var resultado = await _contexto.Etiqueta.AddAsync(etiqueta);
                     await _contexto.SaveChangesAsync();
                     
                     int etiquetaId = etiqueta.Id;
-
-                    var filiais = await _contexto.Filial
-                        .FromSqlRaw(@"
-                            SELECT * 
-                            FROM ""FILIAL"" 
-                            WHERE ""FILIAL_MATRIZ_ID"" = @p0",
-                        matriz.Id)
-                        .ToListAsync();
-
-                    if(filiais.Count > 0)
-                    {
-                        foreach (var filial in filiais)
-                        {
-                            await _contexto.FilialEtiqueta.AddAsync(new FilialEtiquetaModel()
-                            {
-                                FilialId    = filial.Id,
-                                EtiquetaId  = etiquetaId,
-                                MatrizId    = matriz.Id,
-                                Disponivel  = true,
-                            });
-                        }
-                    }
 
                     await transaction.CommitAsync();
                     return new Resposta<bool>(true);
@@ -77,39 +55,28 @@ namespace WebEtiqueta.Repositorys
             };
         }
 
-        public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(Dictionary<string, string> dados)
+        public async Task<Resposta<List<EtiquetaModel>>?> ListarEtiquetas(string empresa, int skip, int qtd)
         {
             try
             {
-                int matrizId = int.Parse(dados["MatrizId"]);
-                int usuarioId = int.Parse(dados["UsuarioId"]);
+                var etiquetas = await (from etiqueta in _contexto.Etiqueta
+                                       join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
+                                       where emp.CnpjCpf == empresa
+                                       select etiqueta)
+                                       .AsNoTracking()
+                                       .Skip(skip)
+                                       .Take(qtd)
+                                       .ToListAsync();
+                if (etiquetas == null)
+                    return null;
 
-                var etiquetas = await _contexto.Etiqueta
-                    .FromSqlRaw(@"
-                        SELECT e.*
-                        FROM ""ETIQUETA"" e
-                        JOIN ""FILIAL_ETIQUETA"" fe ON e.""ETIQUETA_ID"" = fe.""ETIQUETA_ID""
-                        JOIN ""FILIAL"" f ON fe.""FILIAL_ID"" = f.""FILIAL_ID""
-                        JOIN ""USUARIO_FILIAL"" uf ON f.""FILIAL_ID"" = uf.""FILIAL_ID""
-                        WHERE e.""ETIQUETA_MATRIZ_ID"" = @p0
-                            AND uf.""USUARIO_ID"" = @p1
-                            AND fe.""DISPONIVEL"" = TRUE
-                        LIMIT 10",
-                        matrizId, usuarioId)
-                    .ToListAsync();
-
-                return new Resposta<List<EtiquetaModel>>(
-                    //status: true,
-                    mensagem: "Etiquetas listadas com sucesso",
-                    dados: etiquetas
-                );
+                return new Resposta<List<EtiquetaModel>>(etiquetas);
             }
             catch (Exception e)
             {
                 return new Resposta<List<EtiquetaModel>>(
-                    //status: false,
-                    mensagem: "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
-                    logSuporte: e.Message
+                    "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    $"EtiquetaRepository/ListarEtiquetas: {e.Message}"
                 );
             }
         }

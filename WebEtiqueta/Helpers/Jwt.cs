@@ -47,14 +47,14 @@ namespace WebEtiqueta.Helpers
         {
             try
             {
-                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Login) || string.IsNullOrWhiteSpace(usuario.Matriz.CnpjCpf))
+                if (usuario == null || string.IsNullOrWhiteSpace(usuario.Login) || string.IsNullOrWhiteSpace(usuario.Empresa.CnpjCpf))
                 {
                     return new Resposta<string>("Informe os dados do Usuário");
                 }
                 List<Claim> claims = new List<Claim>
                 {
                     new Claim("UsuarioLogin", Convert.ToString(usuario.Login)),
-                    new Claim("Matriz", Convert.ToString(usuario.Matriz.CnpjCpf))
+                    new Claim("Empresa", Convert.ToString(usuario.Empresa.CnpjCpf))
                 };
 
                 if (string.IsNullOrWhiteSpace(secretKey)) return new Resposta<string>("Chave de segurança não configurada");

@@ -64,10 +64,9 @@ namespace WebEtiqueta.Models
         public UsuarioModel? Eliminador { get; set; }
         
         [Required]
-        [Column("ETIQUETA_MATRIZ_ID")]
-        public int MatrizId { get; set; }
-        public MatrizModel Matriz { get; set; }
-        public ICollection<FilialEtiquetaModel> Filiais { get; set; }
+        [Column("ETIQUETA_EMPRESA_ID")]
+        public int EmpresaId { get; set; }
+        public EmpresaModel Empresa { get; set; }
         //      RELACIONAMENTOS.       //
     }
 }

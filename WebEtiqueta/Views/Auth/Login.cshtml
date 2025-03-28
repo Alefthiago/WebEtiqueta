@@ -48,16 +48,16 @@
                                     <div class="p-5">
                                         <div class="text-center">
                                             <h1 class="h4 text-gray-900 mb-4">Web Etiqueta</h1>
-                                            @if (ViewBag.Matriz != null)
+                                            @if (ViewBag.Empresa != null)
                                             {
-                                                <p>@ViewBag.Matriz.Nome</p>
+                                                <p>@ViewBag.Empresa.Nome</p>
                                             }
                                         </div>
                                         <form class="user" id="formLogin">
                                             <div class="form-group">
-                                            <input type="@(ViewBag.Matriz != null ? "hidden" : "text")" class="form-control form-control-user trim-input intP-input"
-                                                   id="matrizCnpjCpf" name="matrizCnpjCpf" placeholder="CNPJ/CPF"
-                                                        value="@(ViewBag.Matriz != null ? ViewBag.Matriz.CnpjCpf : "")" 
+                                            <input type="@(ViewBag.Empresa != null ? "hidden" : "text")" class="form-control form-control-user trim-input intP-input"
+                                                   id="empresaCnpjCpf" name="empresaCnpjCpf" placeholder="CNPJ/CPF"
+                                                        value="@(ViewBag.Empresa != null ? ViewBag.Empresa.CnpjCpf : "")" 
                                                         required>
                                             </div>
 

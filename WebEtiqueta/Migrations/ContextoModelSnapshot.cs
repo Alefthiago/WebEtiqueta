@@ -22,6 +22,46 @@ namespace WebEtiqueta.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("WebEtiqueta.Models.EmpresaModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("EMPRESA_ID");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CnpjCpf")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)")
+                        .HasColumnName("EMPRESA_CNPJ_CPF");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("EMPRESA_NOME");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EMPRESA");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CnpjCpf = "00000000000000",
+                            Nome = "Empresa"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CnpjCpf = "00748572000153",
+                            Nome = "ARMAZÉM FAVEIRO"
+                        });
+                });
+
             modelBuilder.Entity("WebEtiqueta.Models.EtiquetaModel", b =>
                 {
                     b.Property<int>("Id")
@@ -51,6 +91,10 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("ETIQUETA_ELIMINADO_POR");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("ETIQUETA_EMPRESA_ID");
+
                     b.Property<int>("EspacoX")
                         .HasColumnType("integer")
                         .HasColumnName("ETIQUETA_ESPACOX");
@@ -66,10 +110,6 @@ namespace WebEtiqueta.Migrations
                     b.Property<int>("Linhas")
                         .HasColumnType("integer")
                         .HasColumnName("ETIQUETA_LINHAS");
-
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ETIQUETA_MATRIZ_ID");
 
                     b.Property<string>("Modelo")
                         .IsRequired()
@@ -93,122 +133,9 @@ namespace WebEtiqueta.Migrations
 
                     b.HasIndex("EliminadoPor");
 
-                    b.HasIndex("MatrizId");
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("ETIQUETA");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.FilialEtiquetaModel", b =>
-                {
-                    b.Property<int>("FilialId")
-                        .HasColumnType("integer")
-                        .HasColumnName("FILIAL_ID");
-
-                    b.Property<int>("EtiquetaId")
-                        .HasColumnType("integer")
-                        .HasColumnName("ETIQUETA_ID");
-
-                    b.Property<bool>("Disponivel")
-                        .HasColumnType("boolean")
-                        .HasColumnName("DISPONIVEL");
-
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("MATRIZ_ID");
-
-                    b.HasKey("FilialId", "EtiquetaId");
-
-                    b.HasIndex("EtiquetaId");
-
-                    b.HasIndex("MatrizId");
-
-                    b.ToTable("FILIAL_ETIQUETA");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.FilialModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("FILIAL_ID");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CnpjCpf")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("FILIAL_CPNJ_CPF");
-
-                    b.Property<bool>("Eliminado")
-                        .HasColumnType("boolean")
-                        .HasColumnName("FILIAL_ELIMINADO");
-
-                    b.Property<DateTime?>("EliminadoData")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("FILIAL_ELIMINADO_DATA");
-
-                    b.Property<int?>("EliminadoPor")
-                        .HasColumnType("integer")
-                        .HasColumnName("FILIAL_ELIMINADO_POR");
-
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("FILIAL_MATRIZ_ID");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
-                        .HasColumnName("FILIAL_NOME");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EliminadoPor");
-
-                    b.HasIndex("MatrizId");
-
-                    b.ToTable("FILIAL");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.MatrizModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("MATRIZ_ID");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CnpjCpf")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)")
-                        .HasColumnName("MATRIZ_CNPJ_CPF");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("character varying(150)")
-                        .HasColumnName("MATRIZ_NOME");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MATRIZ");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CnpjCpf = "00000000000000",
-                            Nome = "MATRIZ"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CnpjCpf = "00748572000153",
-                            Nome = "ARMAZÉM FAVEIRO"
-                        });
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.NivelAcessoModel", b =>
@@ -224,10 +151,6 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_ADICIONAR_ETIQUETA");
 
-                    b.Property<bool>("AdicionarFilial")
-                        .HasColumnType("boolean")
-                        .HasColumnName("NIVEL_ACESSO_ADICIONAR_FILIAR");
-
                     b.Property<bool>("AdicionarUsuario")
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_ADICIONAR_USUARIO");
@@ -235,10 +158,6 @@ namespace WebEtiqueta.Migrations
                     b.Property<bool>("EditarEtiqueta")
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_EDITAR_ETIQUETA");
-
-                    b.Property<bool>("EditarFilial")
-                        .HasColumnType("boolean")
-                        .HasColumnName("NIVEL_ACESSO_EDITAR_FILIAR");
 
                     b.Property<bool>("EditarUsuario")
                         .HasColumnType("boolean")
@@ -256,21 +175,17 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("NIVEL_ACESSO_ELIMINADO_POR");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("NIVEL_ACESSO_EMPRESA_ID");
+
                     b.Property<bool>("ExcluirEtiqueta")
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_EXCLUIR_ETIQUETA");
 
-                    b.Property<bool>("ExcluirFilial")
-                        .HasColumnType("boolean")
-                        .HasColumnName("NIVEL_ACESSO_EXCLUIR_FILIAR");
-
                     b.Property<bool>("ExcluirUsuario")
                         .HasColumnType("boolean")
                         .HasColumnName("NIVEL_ACESSO_EXCLUIR_USUARIO");
-
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("NIVEL_ACESSO_MATRIZ_ID");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -282,7 +197,7 @@ namespace WebEtiqueta.Migrations
 
                     b.HasIndex("EliminadoPor");
 
-                    b.HasIndex("MatrizId");
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("NIVEL_ACESSO");
 
@@ -291,35 +206,15 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 1,
                             AdicionarEtiqueta = true,
-                            AdicionarFilial = true,
                             AdicionarUsuario = true,
                             EditarEtiqueta = true,
-                            EditarFilial = true,
                             EditarUsuario = true,
                             Eliminado = false,
+                            EmpresaId = 1,
                             ExcluirEtiqueta = true,
-                            ExcluirFilial = true,
                             ExcluirUsuario = true,
-                            MatrizId = 1,
                             Nome = "Administrador"
                         });
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.UsuarioFilialModel", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("USUARIO_ID");
-
-                    b.Property<int>("FilialId")
-                        .HasColumnType("integer")
-                        .HasColumnName("FILIAL_ID");
-
-                    b.HasKey("UsuarioId", "FilialId");
-
-                    b.HasIndex("FilialId");
-
-                    b.ToTable("USUARIO_FILIAL");
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.UsuarioModel", b =>
@@ -343,15 +238,15 @@ namespace WebEtiqueta.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("USUARIO_ELIMINADO_POR");
 
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("USUARIO_EMPRESA_ID");
+
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("USUARIO_LOGIN");
-
-                    b.Property<int>("MatrizId")
-                        .HasColumnType("integer")
-                        .HasColumnName("USUARIO_MATRIZ_ID");
 
                     b.Property<int>("NivelAcessoId")
                         .HasColumnType("integer")
@@ -373,7 +268,7 @@ namespace WebEtiqueta.Migrations
 
                     b.HasIndex("EliminadoPor");
 
-                    b.HasIndex("MatrizId");
+                    b.HasIndex("EmpresaId");
 
                     b.HasIndex("NivelAcessoId");
 
@@ -384,8 +279,8 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 1,
                             Eliminado = false,
+                            EmpresaId = 1,
                             Login = "alef",
-                            MatrizId = 1,
                             NivelAcessoId = 1,
                             Nome = "Alef",
                             Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
@@ -394,8 +289,8 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 2,
                             Eliminado = false,
+                            EmpresaId = 1,
                             Login = "thiago",
-                            MatrizId = 1,
                             NivelAcessoId = 1,
                             Nome = "Thiago",
                             Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
@@ -404,8 +299,8 @@ namespace WebEtiqueta.Migrations
                         {
                             Id = 3,
                             Eliminado = false,
+                            EmpresaId = 2,
                             Login = "thiago",
-                            MatrizId = 2,
                             NivelAcessoId = 1,
                             Nome = "Thiago",
                             Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA=="
@@ -418,59 +313,15 @@ namespace WebEtiqueta.Migrations
                         .WithMany("EtiquetasEliminadas")
                         .HasForeignKey("EliminadoPor");
 
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
+                    b.HasOne("WebEtiqueta.Models.EmpresaModel", "Empresa")
                         .WithMany("Etiquetas")
-                        .HasForeignKey("MatrizId")
+                        .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Eliminador");
 
-                    b.Navigation("Matriz");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.FilialEtiquetaModel", b =>
-                {
-                    b.HasOne("WebEtiqueta.Models.EtiquetaModel", "Etiqueta")
-                        .WithMany("Filiais")
-                        .HasForeignKey("EtiquetaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebEtiqueta.Models.FilialModel", "Filial")
-                        .WithMany("Etiquetas")
-                        .HasForeignKey("FilialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
-                        .WithMany()
-                        .HasForeignKey("MatrizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Etiqueta");
-
-                    b.Navigation("Filial");
-
-                    b.Navigation("Matriz");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.FilialModel", b =>
-                {
-                    b.HasOne("WebEtiqueta.Models.UsuarioModel", "Eliminador")
-                        .WithMany("FiliaisEliminadas")
-                        .HasForeignKey("EliminadoPor");
-
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
-                        .WithMany("Filiais")
-                        .HasForeignKey("MatrizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Eliminador");
-
-                    b.Navigation("Matriz");
+                    b.Navigation("Empresa");
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.NivelAcessoModel", b =>
@@ -479,34 +330,15 @@ namespace WebEtiqueta.Migrations
                         .WithMany("NiveisAcessoEliminados")
                         .HasForeignKey("EliminadoPor");
 
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
+                    b.HasOne("WebEtiqueta.Models.EmpresaModel", "Empresa")
                         .WithMany("NiveisAcesso")
-                        .HasForeignKey("MatrizId")
+                        .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Eliminador");
 
-                    b.Navigation("Matriz");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.UsuarioFilialModel", b =>
-                {
-                    b.HasOne("WebEtiqueta.Models.FilialModel", "Filial")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("FilialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebEtiqueta.Models.UsuarioModel", "Usuario")
-                        .WithMany("Filiais")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Filial");
-
-                    b.Navigation("Usuario");
+                    b.Navigation("Empresa");
                 });
 
             modelBuilder.Entity("WebEtiqueta.Models.UsuarioModel", b =>
@@ -515,9 +347,9 @@ namespace WebEtiqueta.Migrations
                         .WithMany("UsuariosEliminados")
                         .HasForeignKey("EliminadoPor");
 
-                    b.HasOne("WebEtiqueta.Models.MatrizModel", "Matriz")
+                    b.HasOne("WebEtiqueta.Models.EmpresaModel", "Empresa")
                         .WithMany("Usuarios")
-                        .HasForeignKey("MatrizId")
+                        .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -529,28 +361,14 @@ namespace WebEtiqueta.Migrations
 
                     b.Navigation("Eliminador");
 
-                    b.Navigation("Matriz");
+                    b.Navigation("Empresa");
 
                     b.Navigation("NivelAcesso");
                 });
 
-            modelBuilder.Entity("WebEtiqueta.Models.EtiquetaModel", b =>
-                {
-                    b.Navigation("Filiais");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.FilialModel", b =>
+            modelBuilder.Entity("WebEtiqueta.Models.EmpresaModel", b =>
                 {
                     b.Navigation("Etiquetas");
-
-                    b.Navigation("Usuarios");
-                });
-
-            modelBuilder.Entity("WebEtiqueta.Models.MatrizModel", b =>
-                {
-                    b.Navigation("Etiquetas");
-
-                    b.Navigation("Filiais");
 
                     b.Navigation("NiveisAcesso");
 
@@ -565,10 +383,6 @@ namespace WebEtiqueta.Migrations
             modelBuilder.Entity("WebEtiqueta.Models.UsuarioModel", b =>
                 {
                     b.Navigation("EtiquetasEliminadas");
-
-                    b.Navigation("Filiais");
-
-                    b.Navigation("FiliaisEliminadas");
 
                     b.Navigation("NiveisAcessoEliminados");
 

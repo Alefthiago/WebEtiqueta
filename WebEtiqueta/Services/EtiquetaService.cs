@@ -8,27 +8,27 @@ namespace WebEtiqueta.Services
     public class EtiquetaService
     {
         private readonly EtiquetaRepository _etiquetaRepository;
-        private readonly MatrizRepository _matrizRepository;
-        public EtiquetaService(EtiquetaRepository etiquetaRepository, MatrizRepository matrizRepository)
+        private readonly EmpresaRepository _empresaRepository;
+        public EtiquetaService(EtiquetaRepository etiquetaRepository, EmpresaRepository empresaRepository)
         {
             _etiquetaRepository = etiquetaRepository;
-            _matrizRepository = matrizRepository;
+            _empresaRepository = empresaRepository;
         }
 
-        public async Task<Resposta<bool>> AdicionarEtiqueta (AdicionarEtiquetaViewModel form, string matriz)
+        public async Task<Resposta<bool>> AdicionarEtiqueta (AdicionarEtiquetaViewModel form, string empresa)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(matriz))
-                    return new Resposta<bool>("Matriz não encontrada");
+                if (string.IsNullOrWhiteSpace(empresa))
+                    return new Resposta<bool>("Empresa não encontrada");
 
-                Resposta<MatrizModel>? consultaMatriz = await _matrizRepository.PegarMatrizPorCnpjCpf(matriz);
-                if (consultaMatriz == null)
-                    return new Resposta<bool>("Matriz não encontrada");
-                else if (!consultaMatriz.Status)
-                    return new Resposta<bool>(consultaMatriz.Mensagem ?? "Não foi possível carregar os dados da matriz", consultaMatriz.LogSuporte);
+                Resposta<EmpresaModel>? consultaEmpresa = await _empresaRepository.PegarEmpresaPorCnpjCpf(empresa);
+                if (consultaEmpresa == null)
+                    return new Resposta<bool>("Empresa não encontrada");
+                else if (!consultaEmpresa.Status)
+                    return new Resposta<bool>(consultaEmpresa.Mensagem ?? "Não foi possível carregar os dados da Empresa", consultaEmpresa.LogSuporte);
 
-                Resposta<bool>? etiqueta = await _etiquetaRepository.Adicionar(form, consultaMatriz.Dados);
+                Resposta<bool>? etiqueta = await _etiquetaRepository.Adicionar(form, consultaEmpresa.Dados);
 
                 if(etiqueta == null)
                     return new Resposta<bool>("Erro inesperado ao adicionar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte");
@@ -49,34 +49,28 @@ namespace WebEtiqueta.Services
             }
         }
 
-        public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(Dictionary<string, string> dados)
+        public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(string empresa, int skip, int qtd)
         {
             try
             {
-                var consulta = await _etiquetaRepository.ListarEtiquetas(dados);
-                if (consulta.Status)
-                {
-                    return new Resposta<List<EtiquetaModel>>(
-                        //status: true,
-                        mensagem: "Etiquetas listadas com sucesso",
-                        dados: consulta.Dados
-                    );
-                }
-                else
-                {
-                    return new Resposta<List<EtiquetaModel>>(
-                        //status: false,
-                        mensagem: consulta.Mensagem,
-                        logSuporte: consulta.LogSuporte
-                    );
-                }
+                if (!string.IsNullOrWhiteSpace(empresa))
+                    return new Resposta<List<EtiquetaModel>>("Empresa não encontrada, tente novamente");
+                if (skip < 0 || qtd < 1 || qtd > 10)
+                    return new Resposta<List<EtiquetaModel>>("Parâmetros inválidos, tente novamente");
+
+                Resposta<List<EtiquetaModel>>? etiquetas = await _etiquetaRepository.ListarEtiquetas(empresa, skip, qtd);
+                if(etiquetas == null)
+                    return new Resposta<List<EtiquetaModel>>("Etiquetas não encontradas");
+                else if (!etiquetas.Status)
+                    return new Resposta<List<EtiquetaModel>>(etiquetas.Mensagem ?? "Não foi possível listar as etiquetas", etiquetas.LogSuporte);
+
+                return new Resposta<List<EtiquetaModel>>(etiquetas.Dados);
             }
             catch (Exception e)
             {
                 return new Resposta<List<EtiquetaModel>>(
-                    //status: false,
-                    mensagem: "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
-                    logSuporte: e.Message
+                    "Erro ao listar etiquetas, tente novamente mais tarde ou entre em contato com o suporte!",
+                    $"EmpresaService/ListarEtiquetas: {e.Message}"
                 );
             }
         }

@@ -11,36 +11,36 @@ namespace WebEtiqueta.Repositorys
         {
             _contexto = contexto;
         }
-        public async Task<Resposta<UsuarioModel>?> LoginUsuarioPorLoginCnpjCpf(string loginUsuario, string cnpjCpfMatriz)
+        public async Task<Resposta<UsuarioModel>?> LoginUsuarioPorLoginCnpjCpf(string loginUsuario, string cnpjCpf)
         {
             try
             {
                 var resultado = await _contexto.Usuario
                 .AsNoTracking()
                     .Join(
-                        _contexto.Matriz,
-                        usuario => usuario.MatrizId,
-                        matriz => matriz.Id,
-                        (usuario, matriz) => new
+                        _contexto.Empresa,
+                        usuario => usuario.EmpresaId,
+                        empresa => empresa.Id,
+                        (usuario, empresa) => new
                         {
                             usuario,
-                            matriz
+                            empresa
                         }
                     )
                     .Join(
                         _contexto.NivelAcesso,
-                        usuarioMatriz => usuarioMatriz.usuario.NivelAcessoId,
+                        usuarioEmpresa => usuarioEmpresa.usuario.NivelAcessoId,
                         nivelAcesso => nivelAcesso.Id,
-                        (usuarioMatriz, nivelAcesso) => new
+                        (usuarioEmpresa, nivelAcesso) => new
                         {
-                            usuarioMatriz.usuario,
-                            usuarioMatriz.matriz,
+                            usuarioEmpresa.usuario,
+                            usuarioEmpresa.empresa,
                             nivelAcesso
                         }
                     )
                     .FirstOrDefaultAsync(resultado =>
                         resultado.usuario.Eliminado == false &&
-                        resultado.matriz.CnpjCpf == cnpjCpfMatriz &&
+                        resultado.empresa.CnpjCpf == cnpjCpf &&
                         resultado.usuario.Login == loginUsuario
                     );
                 if (resultado != null)
@@ -52,7 +52,7 @@ namespace WebEtiqueta.Repositorys
                             Login   = resultado.usuario.Login,
                             Nome    = resultado.usuario.Nome,
                             Senha   = resultado.usuario.Senha,
-                            Matriz  = new MatrizModel { CnpjCpf = resultado.matriz.CnpjCpf},
+                            Empresa  = new EmpresaModel { CnpjCpf = resultado.empresa.CnpjCpf},
                             NivelAcesso = resultado.nivelAcesso
                         };
                         return new Resposta<UsuarioModel>(usuario);
@@ -70,16 +70,16 @@ namespace WebEtiqueta.Repositorys
             }
         }
 
-        public async Task<Resposta<NivelAcessoModel>?> PegarNivelAcessoPorUsuario(string login, string matriz)
+        public async Task<Resposta<NivelAcessoModel>?> PegarNivelAcessoPorUsuario(string login, string empresa)
         {
             try
             {
                 var resultado = await (from nivelAcesso in _contexto.NivelAcesso
                                 join usuario in _contexto.Usuario
                                 on nivelAcesso.Id equals usuario.NivelAcessoId
-                                join matrizModel in _contexto.Matriz
-                                on usuario.MatrizId equals matrizModel.Id
-                                where usuario.Login == login && matrizModel.CnpjCpf == matriz
+                                join empresaModel in _contexto.Empresa
+                                on usuario.EmpresaId equals empresaModel.Id
+                                where usuario.Login == login && empresaModel.CnpjCpf == empresa
                                 select nivelAcesso).FirstOrDefaultAsync();
                 if (resultado != null)
                 {

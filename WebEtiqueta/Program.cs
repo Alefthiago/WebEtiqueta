@@ -15,21 +15,19 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EtiquetaService>();
-builder.Services.AddScoped<FilialService>();
-builder.Services.AddScoped<MatrizService>();
+builder.Services.AddScoped<EmpresaService>();
 builder.Services.AddScoped<UsuarioService>();
 
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<EtiquetaRepository>();
-builder.Services.AddScoped<FilialRepository>();
-builder.Services.AddScoped<MatrizRepository>();
+builder.Services.AddScoped<EmpresaRepository>();
 builder.Services.AddScoped<UsuarioRepository>();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(1); // Expiração da sessão em 1 dia
+    options.IdleTimeout = TimeSpan.FromDays(1); // Expiraï¿½ï¿½o da sessï¿½o em 1 dia
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });

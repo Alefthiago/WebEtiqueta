@@ -4,35 +4,35 @@ using WebEtiqueta.Models;
 
 namespace WebEtiqueta.Repositorys
 {
-    public class MatrizRepository
+    public class EmpresaRepository
     {
         private readonly Contexto _contexto;
         
-        public MatrizRepository(Contexto contexto)
+        public EmpresaRepository(Contexto contexto)
         {
             _contexto = contexto;
         }
 
-        public async Task<Resposta<MatrizModel>?> PegarMatrizPorCnpjCpf(string cnpjCpf)
+        public async Task<Resposta<EmpresaModel>?> PegarEmpresaPorCnpjCpf(string cnpjCpf)
         {
             try
             {
-                var resultado = await _contexto.Matriz
+                var resultado = await _contexto.Empresa
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(m => m.CnpjCpf == cnpjCpf);
+                    .FirstOrDefaultAsync(e => e.CnpjCpf == cnpjCpf);
                 if (resultado != null)
                 {
                     if (!string.IsNullOrWhiteSpace(resultado.Nome) && !string.IsNullOrWhiteSpace(resultado.CnpjCpf))
-                        return new Resposta<MatrizModel>(resultado);
+                        return new Resposta<EmpresaModel>(resultado);
                 }
 
                 return null;
             }
             catch (Exception e)
             {
-                return new Resposta<MatrizModel>(
-                    "Erro ao buscar matriz, tente novamente mais tarde ou entre em contato com o suporte!",
-                    $"MatrizRepository/PegarMatrizPorCnpjCpf: {e.Message}"
+                return new Resposta<EmpresaModel>(
+                    "Erro ao buscar Empresa, tente novamente mais tarde ou entre em contato com o suporte!",
+                    $"EmpresaRepository/PegarEmpresaPorCnpjCpf: {e.Message}"
                 );
             }
         }

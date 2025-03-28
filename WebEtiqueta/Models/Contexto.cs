@@ -8,12 +8,9 @@ namespace WebEtiqueta.Models
         {
         }
 
-        public DbSet<MatrizModel> Matriz { get; set; }
+        public DbSet<EmpresaModel> Empresa { get; set; }
         public DbSet<EtiquetaModel> Etiqueta { get; set; }
         public DbSet<UsuarioModel> Usuario { get; set; }
-        public DbSet<UsuarioFilialModel> UsuarioFilial { get; set; }
-        public DbSet<FilialModel> Filial { get; set; }
-        public DbSet<FilialEtiquetaModel> FilialEtiqueta { get; set; }
         public DbSet<NivelAcessoModel> NivelAcesso { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,17 +20,17 @@ namespace WebEtiqueta.Models
                 .HasOne(e => e.Eliminador)
                 .WithMany(u => u.EtiquetasEliminadas)
                 .HasForeignKey(e => e.EliminadoPor);
-            modelBuilder.Entity<EtiquetaModel>() // Relacionamento com a tabela Matriz.
-                .HasOne(e => e.Matriz)
+            modelBuilder.Entity<EtiquetaModel>() // Relacionamento com a tabela Empresa.
+                .HasOne(e => e.Empresa)
                 .WithMany(m => m.Etiquetas)
-                .HasForeignKey(e => e.MatrizId);
+                .HasForeignKey(e => e.EmpresaId);
             //     /TABELA ETIQUETA.     //
 
             //      TABELA USUARIO.     //
-            modelBuilder.Entity<UsuarioModel>() // Relacionamento com a tabela Matriz.
-                .HasOne(u => u.Matriz)
+            modelBuilder.Entity<UsuarioModel>() // Relacionamento com a tabela Empresa.
+                .HasOne(u => u.Empresa)
                 .WithMany(m => m.Usuarios)
-                .HasForeignKey(u => u.MatrizId);
+                .HasForeignKey(u => u.EmpresaId);
             modelBuilder.Entity<UsuarioModel>() // Relacionamento com a tabela NivelAcesso.
                 .HasOne(u => u.NivelAcesso)
                 .WithMany(n => n.Usuarios)
@@ -44,62 +41,25 @@ namespace WebEtiqueta.Models
                 .HasForeignKey(u => u.EliminadoPor);
             //     /TABELA USUARIO.     //
 
-            //      TABELA FILIAL.     //
-            modelBuilder.Entity<FilialModel>() // Relacionamento com a tabela Matriz.
-                .HasOne(f => f.Matriz)
-                .WithMany(m => m.Filiais)
-                .HasForeignKey(f => f.MatrizId);
-            modelBuilder.Entity<FilialModel>() // Relacionamento com a tabela Usuario.
-                .HasOne(f => f.Eliminador)
-                .WithMany(u => u.FiliaisEliminadas)
-                .HasForeignKey(f => f.EliminadoPor);
-            //     /TABELA FILIAL.     //
-
-            //      TABELA USUARIO_FILIAL.     //
-            modelBuilder.Entity<UsuarioFilialModel>()
-                .HasKey(sc => new { sc.UsuarioId, sc.FilialId });
-            modelBuilder.Entity<UsuarioFilialModel>()
-                .HasOne(uf => uf.Usuario)
-                .WithMany(u => u.Filiais)
-                .HasForeignKey(uf => uf.UsuarioId);
-            modelBuilder.Entity<UsuarioFilialModel>()
-                .HasOne(uf => uf.Filial)
-                .WithMany(f => f.Usuarios)
-                .HasForeignKey(uf => uf.FilialId);
-            //     /TABELA USUARIO_FILIAL.     //
-
-            //      TABELA FILIAL_ETIQUETA.     //
-            modelBuilder.Entity<FilialEtiquetaModel>()
-                .HasKey(sc => new { sc.FilialId, sc.EtiquetaId });
-            modelBuilder.Entity<FilialEtiquetaModel>()
-                .HasOne(fe => fe.Filial)
-                .WithMany(f => f.Etiquetas)
-                .HasForeignKey(fe => fe.FilialId);
-            modelBuilder.Entity<FilialEtiquetaModel>()
-                .HasOne(fe => fe.Etiqueta)
-                .WithMany(e => e.Filiais)
-                .HasForeignKey(fe => fe.EtiquetaId);
-            //     /TABELA FILIAL_ETIQUETA.     //
-
             //      TABELA NIVEL_ACESSO.     //
-            modelBuilder.Entity<NivelAcessoModel>() // Relacionamento com a tabela Matriz.
-                .HasOne(n => n.Matriz)
+            modelBuilder.Entity<NivelAcessoModel>() // Relacionamento com a tabela Empresa.
+                .HasOne(n => n.Empresa)
                 .WithMany(m => m.NiveisAcesso)
-                .HasForeignKey(n => n.MatrizId);
+                .HasForeignKey(n => n.EmpresaId);
             modelBuilder.Entity<NivelAcessoModel>() // Relacionamento com a tabela Usuario.
                 .HasOne(n => n.Eliminador)
                 .WithMany(u => u.NiveisAcessoEliminados)
                 .HasForeignKey(n => n.EliminadoPor);
             //     /TABELA NIVEL_ACESSO.     //
 
-            modelBuilder.Entity<MatrizModel>()
+            modelBuilder.Entity<EmpresaModel>()
                 .HasData(
-                    new MatrizModel { 
+                    new EmpresaModel { 
                         Id      = 1,
-                        Nome    = "MATRIZ",
+                        Nome    = "Empresa",
                         CnpjCpf = "00000000000000"
                     },
-                    new MatrizModel
+                    new EmpresaModel
                     {
                         Id = 2,
                         Nome = "ARMAZÉM FAVEIRO",
@@ -118,41 +78,38 @@ namespace WebEtiqueta.Models
                         AdicionarEtiqueta   = true,
                         EditarEtiqueta      = true,
                         ExcluirEtiqueta     = true,
-                        AdicionarFilial     = true,
-                        EditarFilial        = true,
-                        ExcluirFilial       = true,
                         Eliminado           = false,
-                        MatrizId            = 1
+                        EmpresaId            = 1
                     }
                 );
             modelBuilder.Entity<UsuarioModel>()
                 .HasData(
                     new UsuarioModel { 
                         Id              = 1,
-                        Nome            = "Alef",
+                        Nome            = "alef",
                         Login           = "alef",
                         Senha           = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        MatrizId        = 1,
+                        EmpresaId        = 1,
                         NivelAcessoId   = 1,
                         Eliminado       = false
                     },
                     new UsuarioModel
                     {
                         Id = 2,
-                        Nome = "Thiago",
+                        Nome = "thiago",
                         Login = "thiago",
                         Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        MatrizId = 1,
+                        EmpresaId = 1,
                         NivelAcessoId = 1,
                         Eliminado = false
                     },
                     new UsuarioModel
                     {
                         Id = 3,
-                        Nome = "Thiago",
+                        Nome = "thiago",
                         Login = "thiago",
                         Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        MatrizId = 2,
+                        EmpresaId = 2,
                         NivelAcessoId = 1,
                         Eliminado = false
                     }

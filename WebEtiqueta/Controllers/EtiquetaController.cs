@@ -97,15 +97,15 @@ namespace WebEtiqueta.Controllers
                 }
                 else
                 {
-                    String? matriz = HttpContext.Session.GetString("Matriz");
-                    if (string.IsNullOrWhiteSpace(matriz))
+                    String? empresa = HttpContext.Session.GetString("Empresa");
+                    if (string.IsNullOrWhiteSpace(empresa))
                     {
                         TempData["AlertaTipo"]      = "danger";
-                        TempData["AlertaMensagem"]  = "Matriz não encontrada, realize o login novamente";
+                        TempData["AlertaMensagem"]  = "Empresa não encontrada, realize o login novamente";
                         return RedirectToAction("Logout", "Auth");
                     }
                     
-                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, matriz);
+                    Resposta<bool> etiquetaAdicionada = await _etiquetaService.AdicionarEtiqueta(form, empresa);
 
                     TempData["AlertaTipo"]      = etiquetaAdicionada.Status ? "success" : "danger";
                     TempData["AlertaMensagem"]  = etiquetaAdicionada.Mensagem;
@@ -126,12 +126,54 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> PegarTodasEtiquetas()
+        public async Task<IActionResult> ListarEtiquetasExe(int skip = 0, int qtd = 10)
         {
-            var dadosToken = (Dictionary<string, string>)HttpContext.Items["DadosToken"];
-            Resposta<List<EtiquetaModel>> etiquetas = await _etiquetaService.ListarEtiquetas(dadosToken);
+            try
+            {
+                if(skip < 0 || qtd < 1 || qtd > 10)
+                {
+                    return BadRequest(new {
+                        Status = false,
+                        Mensagem = "Parâmetros inválidos, tente novamente" 
+                    });
+                }
 
-            return null;
+                String? empresa = HttpContext.Session.GetString("Empresa");
+                if(string.IsNullOrWhiteSpace(empresa))
+                {
+                    return BadRequest(new
+                    {
+                        Status = false,
+                        Mensagem = "Empresa não encontrada, realize o login novamente"
+                    });
+                }
+
+                Resposta<List<EtiquetaModel>> etiquetas = await _etiquetaService.ListarEtiquetas(empresa, skip, qtd);
+                if(etiquetas.Status == false)
+                {
+                    return BadRequest(new
+                    {
+                        Status      = false,
+                        Mensagem    = etiquetas.Mensagem,
+                        LogSuporte  = etiquetas.LogSuporte
+                    });
+                }
+
+                return Ok(new
+                {
+                    Status  = true,
+                    Dados   = etiquetas.Dados
+                });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new
+                {
+                    Status = false,
+                    Mensagem = "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    LogSuporte = $"EtiquetaController/ListarEtiquetasExe: {e.Message}"
+                });
+            }
         }
     }
 }

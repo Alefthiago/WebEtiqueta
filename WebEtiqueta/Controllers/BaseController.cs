@@ -30,13 +30,13 @@ public class BaseController : Controller
 
         // Obtém os valores da sessão antes de qualquer processamento
         string? usuarioSessao = session.GetString("UsuarioLogin");
-        string? matrizSessao = session.GetString("Matriz");
+        string? empresaSessao = session.GetString("Empresa");
         string? niveisJson = session.GetString("NivelAcesso");
 
         // Se a sessão já contém os dados necessários, evita reprocessamento
-        if (!string.IsNullOrEmpty(usuarioSessao) && !string.IsNullOrEmpty(matrizSessao) && !string.IsNullOrEmpty(niveisJson))
+        if (!string.IsNullOrEmpty(usuarioSessao) && !string.IsNullOrEmpty(empresaSessao) && !string.IsNullOrEmpty(niveisJson))
         {
-            DefinirViewData(usuarioSessao, matrizSessao, niveisJson);
+            DefinirViewData(usuarioSessao, empresaSessao, niveisJson);
             await next();
             return;
         }
@@ -44,7 +44,7 @@ public class BaseController : Controller
         // Extrai os dados do token JWT
         var dadosToken = Jwt.DadosToken(token);
         if (!dadosToken.TryGetValue("UsuarioLogin", out var usuarioToken) ||
-            !dadosToken.TryGetValue("Matriz", out var matrizToken))
+            !dadosToken.TryGetValue("Empresa", out var empresaToken))
         {
             RedirecionarParaLogin(context);
             return;
@@ -52,14 +52,14 @@ public class BaseController : Controller
 
         // Caso a sessão não tenha os dados, faz a consulta no banco
         var usuarioService = context.HttpContext.RequestServices.GetRequiredService<UsuarioService>();
-        var consultaNivelAcesso = await usuarioService.PegarNivelAcessoPorUsuario(usuarioToken, matrizToken);
+        var consultaNivelAcesso = await usuarioService.PegarNivelAcessoPorUsuario(usuarioToken, empresaToken);
 
         if (consultaNivelAcesso.Status && consultaNivelAcesso.Dados != null)
         {
             niveisJson = JsonSerializer.Serialize(consultaNivelAcesso.Dados);
             session.SetString("UsuarioLogin", usuarioToken);
             session.SetString("NivelAcesso", niveisJson);
-            session.SetString("Matriz", matrizToken);
+            session.SetString("Empresa", empresaToken);
         }
         else
         {
@@ -70,14 +70,14 @@ public class BaseController : Controller
         }
 
         // Define os dados na ViewData e prossegue para a próxima etapa do pipeline
-        DefinirViewData(usuarioToken, matrizToken, niveisJson);
+        DefinirViewData(usuarioToken, empresaToken, niveisJson);
         await next();
     }
 
-    private void DefinirViewData(string usuario, string matriz, string niveisJson)
+    private void DefinirViewData(string usuario, string empresa, string niveisJson)
     {
         ViewBag.UsuarioLogin    = usuario;
-        ViewBag.Matriz          = matriz;
+        ViewBag.Empresa          = empresa;
         ViewBag.NivelAcesso     = !string.IsNullOrEmpty(niveisJson)
             ? JsonSerializer.Deserialize<NivelAcessoModel>(niveisJson)
             : new NivelAcessoModel();

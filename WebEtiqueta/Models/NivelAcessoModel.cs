@@ -39,24 +39,12 @@ namespace WebEtiqueta.Models
         [Required]
         [Column("NIVEL_ACESSO_EXCLUIR_ETIQUETA")]
         public bool ExcluirEtiqueta { get; set; }
-
-        [Required]
-        [Column("NIVEL_ACESSO_ADICIONAR_FILIAR")]
-        public bool AdicionarFilial { get; set; }
-
-        [Required]
-        [Column("NIVEL_ACESSO_EDITAR_FILIAR")]
-        public bool EditarFilial { get; set; }
-
-        [Required]
-        [Column("NIVEL_ACESSO_EXCLUIR_FILIAR")]
-        public bool ExcluirFilial { get; set; }
         //      CAMPOS.     //
 
         //      RELACIONAMENTOS.     //
-        [Column("NIVEL_ACESSO_MATRIZ_ID")]
-        public int MatrizId { get; set; }
-        public MatrizModel Matriz { get; set; }
+        [Column("NIVEL_ACESSO_EMPRESA_ID")]
+        public int EmpresaId { get; set; }
+        public EmpresaModel Empresa { get; set; }
 
         [Required]
         [Column("NIVEL_ACESSO_ELIMINADO")]
