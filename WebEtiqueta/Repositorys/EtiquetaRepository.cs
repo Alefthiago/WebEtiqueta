@@ -55,20 +55,51 @@ namespace WebEtiqueta.Repositorys
             };
         }
 
-        public async Task<Resposta<List<EtiquetaModel>>?> ListarEtiquetas(string empresa, int skip, int qtd)
+        public async Task<Resposta<List<EtiquetaModel>>?> ListarEtiquetas(string empresa, int skip, int qtd, string search, int order, string orderable)
         {
             try
             {
-                var etiquetas = await (from etiqueta in _contexto.Etiqueta
-                                       join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
-                                       where emp.CnpjCpf == empresa
-                                       select etiqueta)
-                                       .AsNoTracking()
-                                       .Skip(skip)
-                                       .Take(qtd)
-                                       .ToListAsync();
+                var query = from etiqueta in _contexto.Etiqueta
+                            join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
+                            where emp.CnpjCpf == empresa && !etiqueta.Eliminado
+                            select new EtiquetaModel
+                            {
+                                Id = etiqueta.Id,
+                                Nome = etiqueta.Nome,
+                                Modelo = etiqueta.Modelo,
+                                Tipo = etiqueta.Tipo,
+                            };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(etiqueta => etiqueta.Nome.Contains(search) ||
+                                                    etiqueta.Modelo.Contains(search) ||
+                                                    etiqueta.Tipo.Contains(search));
+                }
+
+                switch (order)
+                {
+                    case 0:
+                        query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Nome) : query.OrderByDescending(etiqueta => etiqueta.Nome);
+                        break;
+                    case 1:
+                        query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Modelo) : query.OrderByDescending(etiqueta => etiqueta.Modelo);
+                        break;
+                    case 2:
+                        query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Tipo) : query.OrderByDescending(etiqueta => etiqueta.Tipo);
+                        break;
+                    default:
+                        query = query.OrderBy(etiqueta => etiqueta.Id);
+                        break;
+                }
+
+                var etiquetas = await query
+                                    .AsNoTracking()
+                                    .Skip(skip)
+                                    .Take(qtd)
+                                    .ToListAsync();
                 if (etiquetas == null)
-                    return null;
+                return null;
 
                 return new Resposta<List<EtiquetaModel>>(etiquetas);
             }
@@ -81,5 +112,41 @@ namespace WebEtiqueta.Repositorys
             }
         }
 
+        public async Task<Resposta<int>> QuantidadeEtiquetas(string empresa, string search)
+        {
+            try
+            {
+                var query = from etiqueta in _contexto.Etiqueta
+                            join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
+                            where emp.CnpjCpf == empresa && !etiqueta.Eliminado
+                            select etiqueta;
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    query = query.Where(etiqueta => etiqueta.Nome.Contains(search) ||
+                                                    etiqueta.Modelo.Contains(search) ||
+                                                    etiqueta.Tipo.Contains(search));
+                }
+
+                var quantidade = await query
+                                    .AsNoTracking()
+                                    .CountAsync();
+                //var quantidade = await (from etiqueta in _contexto.Etiqueta
+                //                        join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
+                //                        where emp.CnpjCpf == empresa && !etiqueta.Eliminado
+                //                        select etiqueta)
+                //                        .AsNoTracking()
+                //                        .CountAsync();
+
+                return new Resposta<int>(quantidade);
+            }
+            catch (Exception e)
+            {
+                return new Resposta<int>(
+                    "Erro inesperado ao listar etiquetas, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    $"EtiquetaRepository/QuantidadeEtiquetas: {e.Message}"
+                );
+            }
+        }
     }
 }

@@ -82,6 +82,24 @@ namespace WebEtiqueta.Models
                         EmpresaId            = 1
                     }
                 );
+            modelBuilder.Entity<EtiquetaModel>()
+             .HasData(
+                 Enumerable.Range(1, 50).Select(i => new EtiquetaModel
+                 {
+                     Id = i,
+                     Nome = $"Etiqueta {i}",
+                     Colunas = 2,
+                     Linhas = 2,
+                     Modelo = "Modelo",
+                     Largura = 100,
+                     Altura = 100,
+                     EspacoX = 10,
+                     EspacoY = 10,
+                     Tipo = "Tipo",
+                     Eliminado = false,
+                     EmpresaId = 1
+                 }).ToArray()
+             );
             modelBuilder.Entity<UsuarioModel>()
                 .HasData(
                     new UsuarioModel { 

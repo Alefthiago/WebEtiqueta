@@ -49,20 +49,24 @@ namespace WebEtiqueta.Services
             }
         }
 
-        public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(string empresa, int skip, int qtd)
+        public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(string empresa, int skip, int qtd, string search, int order, string orderable)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(empresa))
-                    return new Resposta<List<EtiquetaModel>>("Empresa não encontrada, tente novamente");
+                //      EMPRESA.        //
+                if (string.IsNullOrWhiteSpace(empresa))
+                    return new Resposta<List<EtiquetaModel>>("Empresa não encontrada, realize o login novamente");
                 if (skip < 0 || qtd < 1 || qtd > 10)
                     return new Resposta<List<EtiquetaModel>>("Parâmetros inválidos, tente novamente");
+                //     /EMPRESA.        //
 
-                Resposta<List<EtiquetaModel>>? etiquetas = await _etiquetaRepository.ListarEtiquetas(empresa, skip, qtd);
+                //      ETIQUETAS.      //
+                Resposta<List<EtiquetaModel>>? etiquetas = await _etiquetaRepository.ListarEtiquetas(empresa, skip, qtd, search, order, orderable);
                 if(etiquetas == null)
                     return new Resposta<List<EtiquetaModel>>("Etiquetas não encontradas");
                 else if (!etiquetas.Status)
                     return new Resposta<List<EtiquetaModel>>(etiquetas.Mensagem ?? "Não foi possível listar as etiquetas", etiquetas.LogSuporte);
+                //     /ETIQUETAS.      //
 
                 return new Resposta<List<EtiquetaModel>>(etiquetas.Dados);
             }
@@ -71,6 +75,30 @@ namespace WebEtiqueta.Services
                 return new Resposta<List<EtiquetaModel>>(
                     "Erro ao listar etiquetas, tente novamente mais tarde ou entre em contato com o suporte!",
                     $"EmpresaService/ListarEtiquetas: {e.Message}"
+                );
+            }
+        }
+
+        public async Task<Resposta<int>> QuantidadeEtiquetas(string empresa, string search)
+        {
+            try
+            {
+                //      EMPRESA.        //
+                if (string.IsNullOrWhiteSpace(empresa))
+                    return new Resposta<int>("Empresa não encontrada, realize o login novamente");
+                //     /EMPRESA.        //
+
+                //      ETIQUETAS.      //
+                Resposta<int> etiquetas = await _etiquetaRepository.QuantidadeEtiquetas(empresa, search);
+                if (!etiquetas.Status)
+                    return new Resposta<int>(etiquetas.Mensagem ?? "Não foi possível listar as etiquetas", etiquetas.LogSuporte);
+
+                return new Resposta<int>(etiquetas.Dados);
+            } catch (Exception e)
+            {
+                return new Resposta<int>(
+                    "Erro ao listar etiquetas, tente novamente mais tarde ou entre em contato com o suporte!",
+                    $"EmpresaService/QuantidadeEtiquetas: {e.Message}"
                 );
             }
         }

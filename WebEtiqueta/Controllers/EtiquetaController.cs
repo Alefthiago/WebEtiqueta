@@ -126,14 +126,15 @@ namespace WebEtiqueta.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ListarEtiquetasExe(int skip = 0, int qtd = 10)
+        public async Task<IActionResult> ListarEtiquetasExe(string search, int order, string orderable, int skip = 0, int qtd = 10)
         {
             try
             {
-                if(skip < 0 || qtd < 1 || qtd > 10)
+                Thread.Sleep(500);
+                if (skip < 0 || qtd < 1 || qtd > 10)
                 {
                     return BadRequest(new {
-                        Status = false,
+                        status = false,
                         Mensagem = "Parâmetros inválidos, tente novamente" 
                     });
                 }
@@ -144,11 +145,11 @@ namespace WebEtiqueta.Controllers
                     return BadRequest(new
                     {
                         Status = false,
-                        Mensagem = "Empresa não encontrada, realize o login novamente"
+                        Mensagem = "Dados da sessão não encontrados, realize o login novamente"
                     });
                 }
 
-                Resposta<List<EtiquetaModel>> etiquetas = await _etiquetaService.ListarEtiquetas(empresa, skip, qtd);
+                Resposta<List<EtiquetaModel>> etiquetas = await _etiquetaService.ListarEtiquetas(empresa, skip, qtd, search, order, orderable);
                 if(etiquetas.Status == false)
                 {
                     return BadRequest(new
@@ -159,10 +160,15 @@ namespace WebEtiqueta.Controllers
                     });
                 }
 
-                return Ok(new
+                Resposta<int> qtdEtiquetas = await _etiquetaService.QuantidadeEtiquetas(empresa, search);
+
+                int qtdPaginas = (int)Math.Ceiling((double)qtdEtiquetas.Dados / qtd);
+                return Json(new
                 {
                     Status  = true,
-                    Dados   = etiquetas.Dados
+                    data = etiquetas.Dados,
+                    recordsTotal = qtdEtiquetas.Dados,
+                    recordsFiltered = qtdEtiquetas.Dados,
                 });
             }
             catch (Exception e)

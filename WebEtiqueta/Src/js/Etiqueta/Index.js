@@ -8,41 +8,66 @@ $(document).ready(function () {
     //      EVENTOS.      //
     $adicionarEtiquetaModal.on('hidden.bs.modal', () => $('#formAdicionarEtiqueta').trigger('reset'));
     //     /EVENTOS.      //
-
     new DataTable('#tabelaEtiquetasGeral', {
         responsive: true,
-        rowReorder: {
-            selector: 'td:nth-child(2)'
-        },
+        serverSide: true,
+        //rowReorder: {
+        //    selector: 'td:nth-child(2)'
+        //},
         language: {
             url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/pt_br.json",
-            "info": "",
+            info: "",
+            infoEmpty: "",
+            infoFiltered: "",
+            lengthMenu: "",
+            loadingRecords: () => loadTabela("tabelaEtiquetasGeral", 4),
+            paginate: {
+                first: "<<",
+                last: ">>",
+                next: ">",
+                previous: "<"
+            },
         },
         pageLength: 10,
         lengthChange: false,
         ajax: {
-            url: `${BASE_URL}/`,
+            url: `${BASE_URL}/Etiqueta/ListarEtiquetasExe`,
+            type: 'GET',
             data: function (d) {
-                return {
-                    skip: d.start, // From the DataTable
-                    qtd: d.length  // From the DataTable
-                };
+                d.skip = d.start;
+                d.qtd = d.length;
+                d.search = d.search.value;
+                d.orderable = d.order[0].dir;
+                d.order = d.order[0].column;
+                loadTabela("tabelaEtiquetasGeral", 4)
             },
             dataSrc: function (json) {
-                if (json.Status === false) {
-                    // Handle error (e.g., show an alert or log)
-                    alert(json.Mensagem);
-                    return [];
-                }
-                return json.Dados; // Return the data array
+                return json.data;
             },
-            error: function (xhr, error, thrown) {
-                // Handle any AJAX errors
-                alert('Ocorreu um erro ao carregar os dados. Tente novamente.');
+            error: function (xhr, status, error) {
+                if (xhr.responseJSON !== undefined) {
+                    let resposta = xhr.responseJSON;
+                    console.error("Erro: ", resposta.logSuporte);
+                    abrirAlertaPage("danger", resposta.mensagem, resposta.logSuporte);
+                } else {
+                    console.error("Erro: ", error);
+                    abrirAlertaPage("danger", "Erro inesperado ao conectar com o servidor, tente novamente mais tarde ou entre em contato com o suporte");
+                }
             }
-        }
+        },
+        columns: [
+            { data: 'nome' },
+            { data: 'modelo' },
+            { data: 'tipo' },
+            {
+                data: 'id',
+                render: function (data, type, row) {
+                    return `<button class="btn btn-primary btn-sm" onclick="editarEtiqueta(${data})">Editar</button>`;
+                }
+            }
+        ],
+        columnDefs: [
+            { orderable: false, targets: [3] }
+        ]
     });
-
-
-    loadTabela("tabelaEtiquetasGeral", 4);
 });
