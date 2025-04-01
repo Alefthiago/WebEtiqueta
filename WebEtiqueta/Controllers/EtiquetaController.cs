@@ -120,7 +120,47 @@ namespace WebEtiqueta.Controllers
                 return RedirectToAction("Adicionar");
             }
         }
-        public IActionResult A4()
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                if(id < 1)
+                {
+                    return BadRequest(new
+                    {
+                        status = false,
+                        mensagem = "Parâmetros inválidos, tente novamente"
+                    });
+                }
+
+
+
+                String? empresa = HttpContext.Session.GetString("Empresa");
+                if (string.IsNullOrWhiteSpace(empresa))
+                {
+                    return BadRequest(new
+                    {
+                        status = false,
+                        mensagem = "Dados da sessão não encontrados, realize o login novamente"
+                    });
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new
+                {
+                    status = false,
+                    mensagem = "Erro inesperado ao deletar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    logSuporte = $"EtiquetaController/Delete: {e.Message}"
+                });
+            }
+        }
+
+            public IActionResult A4()
         {
             return View("~/Views/Etiqueta/A4/Lista.cshtml");
         }
