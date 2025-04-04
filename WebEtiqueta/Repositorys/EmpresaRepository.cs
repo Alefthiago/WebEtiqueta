@@ -36,5 +36,24 @@ namespace WebEtiqueta.Repositorys
                 );
             }
         }
+
+        public async Task<Resposta<bool>> ConsultaEmpresaExiste(string cnpjCpf)
+        {
+            try
+            {
+                var resultado = await _contexto.Empresa
+                    .AsNoTracking()
+                    .CountAsync(e => e.CnpjCpf == cnpjCpf) > 0;
+
+                return new Resposta<bool>(resultado);
+            }
+            catch (Exception e)
+            {
+                return new Resposta<bool>(
+                    "Erro ao consultar Empresa, tente novamente mais tarde ou entre em contato com o suporte!",
+                    $"EmpresaRepository/ConsultaEmpresaExiste: {e.Message}"
+                );
+            }
+        }
     }
 }

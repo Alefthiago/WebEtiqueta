@@ -15,7 +15,7 @@ namespace WebEtiqueta.Services
         {
             _config             = config;
             _authRepoistory     = authRepository;
-            _empresaRepository   = empresaRepository;
+            _empresaRepository  = empresaRepository;
             _usuarioRepository  = usuarioRepository;
         }
 
@@ -23,54 +23,34 @@ namespace WebEtiqueta.Services
         {
             try
             {
+                if(!Util.ValidaDocumento(cnpjCpf))
+                    return new Resposta<UsuarioModel>("CNPJ/CPF inválido");
+            
                 Resposta<UsuarioModel>? consultaUsuario;
-
-                string? loginSuporte = _config.GetSection("Suporte:LoginSuporte").Value;
-                string? senhaSuporte = _config.GetSection("Suporte:SenhaSuporte").Value;
-                if(string.IsNullOrWhiteSpace(loginSuporte) || string.IsNullOrWhiteSpace(senhaSuporte)) 
-                    return new Resposta<UsuarioModel>("Dados de suporte não configurados");
-
-                if (loginSuporte == login) // Validação para usuário de suporte
+                if(login == "suporte")
                 {
-                    Resposta<EmpresaModel>? consultaEmpresa = await _empresaRepository.PegarEmpresaPorCnpjCpf(cnpjCpf);
-                    if (consultaEmpresa == null) 
-                        return new Resposta<UsuarioModel>("Empresa não encontrada");
-                    else if (!consultaEmpresa.Status) 
-                        return new Resposta<UsuarioModel>(consultaEmpresa.Mensagem ?? "Não foi possível carregar os dados da empresa", consultaEmpresa.LogSuporte);
-
-                    UsuarioModel usuarioSuporte = new UsuarioModel()
-                    {
-                        Login   = loginSuporte,
-                        Nome    = loginSuporte,
-                        Senha   = senhaSuporte,
-                        Empresa  = new EmpresaModel()
-                        {
-                            CnpjCpf = cnpjCpf
-                        },
-                        NivelAcesso = new NivelAcessoModel()
-                        {
-                            Id = 2147483647 //ajustar suporte
-                        }
-                    };
-
-                    if (!Util.CompararSenha(usuarioSuporte, senha)) 
-                        return new Resposta<UsuarioModel>("Dados Inválidos");
-
-                    consultaUsuario = new Resposta<UsuarioModel>(usuarioSuporte);
-                }
-                else
+                    consultaUsuario = await _authRepoistory.PegarUsuarioSuporteLogin(login, cnpjCpf);
+                    if(consultaUsuario == null) return new Resposta<UsuarioModel>("Não foi possível recuperar os dados do suporte, verifique as configurações da aplicação");
+                } else
                 {
-                    consultaUsuario = await _usuarioRepository.LoginUsuarioPorLoginCnpjCpf(login, cnpjCpf);
-                    if (consultaUsuario == null)
-                        return new Resposta<UsuarioModel>("Dados Inválidos");
-                    else if (!consultaUsuario.Status)
-                        return consultaUsuario;
-
-                    if (!Util.CompararSenha(consultaUsuario.Dados, senha))
-                        return new Resposta<UsuarioModel>("Dados Inválidos");
+                    consultaUsuario = await _authRepoistory.LoginUsuarioCnpjCpfLogin(login, cnpjCpf);
+                    if (consultaUsuario == null) return new Resposta<UsuarioModel>("Dados inválidos, verifique os campos");
                 }
 
-                return consultaUsuario;
+                if (!consultaUsuario.Status)
+                {
+                    return new Resposta<UsuarioModel>(
+                        consultaUsuario.Mensagem ?? "Não foi possível carregar os dados do suporte",
+                        consultaUsuario.LogSuporte
+                    );
+                }
+                if(consultaUsuario.Dados == null || consultaUsuario.Dados == default)
+                    return new Resposta<UsuarioModel>("Dados inválidos, verifique os campos");
+                
+                if(!Util.CompararSenha(consultaUsuario.Dados, senha))
+                    return new Resposta<UsuarioModel>("Dados inválidos, verifique os campos");
+
+                return new Resposta<UsuarioModel>(consultaUsuario.Dados);
             }
             catch (Exception e)
             {
@@ -81,7 +61,7 @@ namespace WebEtiqueta.Services
             }
         }
 
-        public Resposta<bool> ValidarSenhaSuporte(string senha)
+        public async Task<Resposta<bool>> ValidarSenhaSuporte(string senha)
         {
             if (string.IsNullOrWhiteSpace(senha))
             {
@@ -89,26 +69,20 @@ namespace WebEtiqueta.Services
             }
             try
             {
-                Resposta<string>? senhaSuporte = _authRepoistory.SenhaSuporte(senha);
-                if (senhaSuporte == null) return new Resposta<bool>("Não foi possível recuperar a senha do suporte");
-                else if (!senhaSuporte.Status)
+                Resposta<UsuarioModel>? usuarioSuporte = await _authRepoistory.PegarUsuarioSuporte();
+                if (!usuarioSuporte.Status)
                 {
                     return new Resposta<bool>(
-                        senhaSuporte.Mensagem ?? "Não foi possível carregar os dados da configuração",
-                        senhaSuporte.LogSuporte
+                        usuarioSuporte.Mensagem ?? "Não foi possível carregar os dados do suporte",
+                        usuarioSuporte.LogSuporte
                     );
                 }
 
-                UsuarioModel usuario = new UsuarioModel()
-                {
-                    Login = _config.GetSection("Suporte:LoginSuporte").Value,
-                    Senha = senhaSuporte.Dados,
-                };
-
-                if (!Util.CompararSenha(usuario, senha)) return new Resposta<bool>("Senha inválida");
-
-                return new Resposta<bool>(true);
-            } catch (Exception e)
+                return Util.CompararSenha(usuarioSuporte.Dados, senha)
+                    ? new Resposta<bool>(true)
+                    : new Resposta<bool>("Senha inválida");
+            }
+            catch (Exception e)
             {
                 return new Resposta<bool>(
                     "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte!", 

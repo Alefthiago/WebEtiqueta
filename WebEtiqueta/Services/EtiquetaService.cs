@@ -49,6 +49,33 @@ namespace WebEtiqueta.Services
             }
         }
 
+        public async Task<Resposta<bool>> DeletarEtiqueta(int id, string cnpjCpf, int usuarioId)
+        {
+            try
+            {
+                //      VALIDAÇÃO.       //
+                Resposta<EmpresaModel>? empresa = await _empresaRepository.PegarEmpresaPorCnpjCpf(cnpjCpf);
+                if(empresa == null)
+                    return new Resposta<bool>("Empresa não encontrada, realize o login novamente");
+                else if (!empresa.Status)
+                    return new Resposta<bool>(empresa.Mensagem ?? "Não foi possível carregar os dados da Empresa", empresa.LogSuporte);
+                //     /VALIDAÇÃO.       //
+                
+                Resposta<bool> etiqueta = await _etiquetaRepository.Deletar(id, empresa.Dados.Id, usuarioId);
+                if (!etiqueta.Status)
+                    return new Resposta<bool>(etiqueta.Mensagem ?? "Não foi possível deletar a etiqueta", etiqueta.LogSuporte);
+
+                return new Resposta<bool>(true, "Etiqueta deletada com sucesso");
+            }
+            catch (Exception e)
+            {
+                return new Resposta<bool>(
+                    "Erro inesperado ao deletar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    $"EtiquetaService/DeletarEtiqueta: {e.Message}"
+                );
+            }
+        }
+
         public async Task<Resposta<List<EtiquetaModel>>> ListarEtiquetas(string empresa, int skip, int qtd, string search, int order, string orderable)
         {
             try

@@ -12,6 +12,10 @@ namespace WebEtiqueta.Models
         public int Id { get; set; }
 
         [Required]
+        [Column("NIVEL_ACESSO_LOG")]
+        public bool Log { get; set; }
+
+        [Required]
         [Column("NIVEL_ACESSO_NOME")]
         [StringLength(50)]
         public string Nome { get; set; }

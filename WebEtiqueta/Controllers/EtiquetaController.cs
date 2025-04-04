@@ -35,13 +35,12 @@ namespace WebEtiqueta.Controllers
                 {
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = resultado.Mensagem;
-                    return RedirectToAction("Login", "Auth");
+                    return RedirectToAction("Logout", "Auth");
                 }
+
                 NivelAcessoModel? nivelAcesso =  JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
-                if (nivelAcesso != null && (nivelAcesso.AdicionarEtiqueta || nivelAcesso.Id == int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value)))
-                {
+                if (nivelAcesso != null && nivelAcesso.AdicionarEtiqueta)
                     return View("Adicionar");
-                }
                 else
                 {
                     TempData["AlertaTipo"]      = "danger";
@@ -74,11 +73,11 @@ namespace WebEtiqueta.Controllers
                 }
 
                 NivelAcessoModel? nivelAcesso = JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
-                if (nivelAcesso.Id != int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value) && !nivelAcesso.AdicionarEtiqueta)
+                if (!nivelAcesso.AdicionarEtiqueta)
                 {
                     TempData["AlertaTipo"]      = "danger";
                     TempData["AlertaMensagem"]  = "Você não tem permissão para adicionar etiquetas";
-                    return RedirectToAction("Logout", "Auth");
+                    return RedirectToAction("Index");
                 }
                 //     /VALIDAÇÃO DE NÍVEL DE ACESSO.       //
 
@@ -126,7 +125,8 @@ namespace WebEtiqueta.Controllers
         {
             try
             {
-                if(id < 1)
+                //      VALIDAÇÃO.       //
+                if (id < 1)
                 {
                     return BadRequest(new
                     {
@@ -135,9 +135,8 @@ namespace WebEtiqueta.Controllers
                     });
                 }
 
-
-
                 String? empresa = HttpContext.Session.GetString("Empresa");
+                int usuarioId = int.Parse(HttpContext.Session.GetString("UsuarioId"));
                 if (string.IsNullOrWhiteSpace(empresa))
                 {
                     return BadRequest(new
@@ -147,7 +146,44 @@ namespace WebEtiqueta.Controllers
                     });
                 }
 
+                Resposta<bool> nivelAcessoValidado = ValidacoesPadrao.ValidarNivelAcesso(HttpContext, _config);
+                if (!nivelAcessoValidado.Status)
+                {
+                    return BadRequest(new
+                    {
+                        status = false,
+                        mensagem = nivelAcessoValidado.Mensagem,
+                        logSuporte = nivelAcessoValidado.LogSuporte
+                    });
+                }
 
+                NivelAcessoModel? nivelAcesso = JsonSerializer.Deserialize<NivelAcessoModel>(HttpContext.Session.GetString("NivelAcesso"));
+                if (nivelAcesso.Id != int.Parse(_config.GetSection("Suporte:NivelAcessoId").Value) && !nivelAcesso.ExcluirEtiqueta)
+                {
+                    return BadRequest(new
+                    {
+                        status = false,
+                        mensagem = "Você não tem permissão para excluir etiquetas"
+                    });
+                }
+                //     /VALIDAÇÃO.       //
+
+                Resposta<bool> etiquetaDeletada = await _etiquetaService.DeletarEtiqueta(id, empresa, usuarioId);
+                if (!etiquetaDeletada.Status)
+                {
+                    return BadRequest(new
+                    {
+                        status      = false,
+                        mensagem    = etiquetaDeletada.Mensagem ?? "Não foi possível deletar a etiqueta",
+                        logSuporte  = etiquetaDeletada.LogSuporte
+                    });
+                }
+
+                return Ok(new
+                {
+                    status = true,
+                    mensagem = "Etiqueta deletada com sucesso"
+                });
             }
             catch (Exception e)
             {

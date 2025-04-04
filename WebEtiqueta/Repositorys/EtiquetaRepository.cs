@@ -55,10 +55,44 @@ namespace WebEtiqueta.Repositorys
             };
         }
 
+        public async Task<Resposta<bool>> Deletar(int idEtiqueta, int idEmpresa, int usuarioId)
+        {
+            using(var transaction = await _contexto.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var etiqueta = await _contexto.Etiqueta
+                        .Where(e => e.Id == idEtiqueta && !e.Eliminado && e.EmpresaId == idEmpresa)
+                        .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(e => e.Eliminado, true)
+                        .SetProperty(e => e.EliminadoData, DateTime.UtcNow)
+                        .SetProperty(e => e.EliminadoPor, usuarioId));
+
+                    if (etiqueta == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        return new Resposta<bool>("Etiqueta não encontrada, tente novamente");
+                    }
+
+                    await _contexto.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return new Resposta<bool>(true);
+                } catch(Exception e)
+                {
+                    await transaction.RollbackAsync();
+                    return new Resposta<bool>(
+                        "Erro inesperado ao deletar etiqueta, tente novamente mais tarde ou entre em contato com nosso suporte",
+                        $"EtiquetaRepository/Deletar: {e.Message}"
+                    );
+                }
+            }
+        }
+
         public async Task<Resposta<List<EtiquetaModel>>?> ListarEtiquetas(string empresa, int skip, int qtd, string search, int order, string orderable)
         {
             try
             {
+                //      QUERY FIXA.       //
                 var query = from etiqueta in _contexto.Etiqueta
                             join emp in _contexto.Empresa on etiqueta.EmpresaId equals emp.Id
                             where emp.CnpjCpf == empresa && !etiqueta.Eliminado
@@ -69,29 +103,34 @@ namespace WebEtiqueta.Repositorys
                                 Modelo = etiqueta.Modelo,
                                 Tipo = etiqueta.Tipo,
                             };
+                //     /QUERY FIXA.       //
 
+                //      PESQUISA.        //
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     query = query.Where(etiqueta => etiqueta.Nome.Contains(search) ||
                                                     etiqueta.Modelo.Contains(search) ||
                                                     etiqueta.Tipo.Contains(search));
                 }
+                //     /PESQUISA.        //
 
+                //      ORDENAÇÃO.       //
                 switch (order)
                 {
-                    case 0:
+                    case 0: // COLUNA NOME
                         query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Nome) : query.OrderByDescending(etiqueta => etiqueta.Nome);
                         break;
-                    case 1:
+                    case 1: // COLUNA MODELO
                         query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Modelo) : query.OrderByDescending(etiqueta => etiqueta.Modelo);
                         break;
-                    case 2:
+                    case 2: // COLUNA TIPO
                         query = orderable == "asc" ? query.OrderBy(etiqueta => etiqueta.Tipo) : query.OrderByDescending(etiqueta => etiqueta.Tipo);
                         break;
-                    default:
+                    default: // PADRÃO
                         query = query.OrderBy(etiqueta => etiqueta.Id);
                         break;
                 }
+                //     /ORDENAÇÃO.       //
 
                 var etiquetas = await query
                                     .AsNoTracking()

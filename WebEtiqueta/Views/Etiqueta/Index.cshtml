@@ -8,7 +8,7 @@
                         Etiquetas
                     </h6>
                 </div>
-                @if (ViewBag.NivelAcesso.AdicionarEtiqueta || ViewBag.NivelAcesso.Id == ViewBag.NivelAcessoSuporteId)
+                @if (ViewBag.NivelAcesso.AdicionarEtiqueta)
                 {
                     <a asp-area="" asp-controller="Etiqueta" asp-action="Adicionar" class="btn btn-info btn-circle" title="Adicionar Modelo de Etiqueta">
                         <i class="fas fa-plus"></i>

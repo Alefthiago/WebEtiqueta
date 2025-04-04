@@ -19,12 +19,6 @@ namespace WebEtiqueta.Helpers
                     return new Resposta<bool>("Nível de acesso não encontrado, faça o login novamente");
                 }
 
-                string? nivelAcessoIdSuporte = config.GetSection("Suporte:NivelAcessoId").Value;
-                if (string.IsNullOrWhiteSpace(nivelAcessoIdSuporte))
-                {
-                    return new Resposta<bool>("Nível de acesso de suporte não configurado");
-                }
-
                 return new Resposta<bool>(true);
             }
             catch (Exception e)

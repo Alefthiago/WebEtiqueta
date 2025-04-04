@@ -56,13 +56,13 @@ namespace WebEtiqueta.Models
                 .HasData(
                     new EmpresaModel { 
                         Id      = 1,
-                        Nome    = "Empresa",
+                        Nome    = "suporte",
                         CnpjCpf = "00000000000000"
                     },
                     new EmpresaModel
                     {
                         Id = 2,
-                        Nome = "ARMAZÉM FAVEIRO",
+                        Nome = "empresa 2",
                         CnpjCpf = "00748572000153"
                     }
                 );
@@ -71,7 +71,8 @@ namespace WebEtiqueta.Models
                     new NivelAcessoModel
                     {
                         Id                  = 1,
-                        Nome                = "Administrador",
+                        Nome                = "suporte",
+                        Log                 = true,
                         AdicionarUsuario    = true,
                         EditarUsuario       = true,
                         ExcluirUsuario      = true,
@@ -79,57 +80,37 @@ namespace WebEtiqueta.Models
                         EditarEtiqueta      = true,
                         ExcluirEtiqueta     = true,
                         Eliminado           = false,
-                        EmpresaId            = 1
+                        EmpresaId           = 1
                     }
                 );
             modelBuilder.Entity<EtiquetaModel>()
              .HasData(
                  Enumerable.Range(1, 50).Select(i => new EtiquetaModel
                  {
-                     Id = i,
-                     Nome = $"Etiqueta {i}",
-                     Colunas = 2,
-                     Linhas = 2,
-                     Modelo = "Modelo",
-                     Largura = 100,
-                     Altura = 100,
-                     EspacoX = 10,
-                     EspacoY = 10,
-                     Tipo = "Tipo",
-                     Eliminado = false,
-                     EmpresaId = 1
+                     Id         = i,
+                     Nome       = $"etiqueta {i}",
+                     Colunas    = 2,
+                     Linhas     = 2,
+                     Modelo     = "modelo",
+                     Largura    = 100,
+                     Altura     = 100,
+                     EspacoX    = 10,
+                     EspacoY    = 10,
+                     Tipo       = "tipo",
+                     Eliminado  = false,
+                     EmpresaId  = 2
                  }).ToArray()
              );
             modelBuilder.Entity<UsuarioModel>()
                 .HasData(
                     new UsuarioModel { 
                         Id              = 1,
-                        Nome            = "alef",
-                        Login           = "alef",
+                        Nome            = "suporte",
+                        Login           = "suporte",
                         Senha           = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        EmpresaId        = 1,
+                        EmpresaId       = 1,
                         NivelAcessoId   = 1,
                         Eliminado       = false
-                    },
-                    new UsuarioModel
-                    {
-                        Id = 2,
-                        Nome = "thiago",
-                        Login = "thiago",
-                        Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        EmpresaId = 1,
-                        NivelAcessoId = 1,
-                        Eliminado = false
-                    },
-                    new UsuarioModel
-                    {
-                        Id = 3,
-                        Nome = "thiago",
-                        Login = "thiago",
-                        Senha = "AQAAAAIAAYagAAAAEAH7K+qacDcQl3Iw8EB617kxQ39wbjr5PfBAJtfxHNS79SSubo1NIBwgOx2KqJh+eA==",
-                        EmpresaId = 2,
-                        NivelAcessoId = 1,
-                        Eliminado = false
                     }
                 );
         }

@@ -54,6 +54,7 @@ namespace WebEtiqueta.Helpers
                 List<Claim> claims = new List<Claim>
                 {
                     new Claim("UsuarioLogin", Convert.ToString(usuario.Login)),
+                    new Claim("UsuarioId", Convert.ToString(usuario.Id)),
                     new Claim("Empresa", Convert.ToString(usuario.Empresa.CnpjCpf))
                 };
 
@@ -77,7 +78,10 @@ namespace WebEtiqueta.Helpers
             }
             catch (Exception e)
             {
-                return new Resposta<string>(mensagem: "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte", logSuporte: e.Message);
+                return new Resposta<string>(
+                    "Erro ao gerar token, tente novamente mais tarde ou entre em contato com nosso suporte",
+                    $"Jwt/GerarJwtToken: {e.Message}"
+                );
             }
         }
     }

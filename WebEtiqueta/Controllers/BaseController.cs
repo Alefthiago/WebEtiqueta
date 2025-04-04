@@ -44,7 +44,8 @@ public class BaseController : Controller
         // Extrai os dados do token JWT
         var dadosToken = Jwt.DadosToken(token);
         if (!dadosToken.TryGetValue("UsuarioLogin", out var usuarioToken) ||
-            !dadosToken.TryGetValue("Empresa", out var empresaToken))
+            !dadosToken.TryGetValue("Empresa", out var empresaToken) ||
+            !dadosToken.TryGetValue("UsuarioId", out var usuarioId))
         {
             RedirecionarParaLogin(context);
             return;
@@ -60,6 +61,7 @@ public class BaseController : Controller
             session.SetString("UsuarioLogin", usuarioToken);
             session.SetString("NivelAcesso", niveisJson);
             session.SetString("Empresa", empresaToken);
+            session.SetString("UsuarioId", usuarioId);
         }
         else
         {
@@ -77,11 +79,11 @@ public class BaseController : Controller
     private void DefinirViewData(string usuario, string empresa, string niveisJson)
     {
         ViewBag.UsuarioLogin    = usuario;
-        ViewBag.Empresa          = empresa;
+        ViewBag.Empresa         = empresa;
         ViewBag.NivelAcesso     = !string.IsNullOrEmpty(niveisJson)
             ? JsonSerializer.Deserialize<NivelAcessoModel>(niveisJson)
             : new NivelAcessoModel();
-        ViewBag.NivelAcessoSuporteId = int.Parse(_configuration.GetSection("Suporte:NivelAcessoId").Value);
+        ViewBag.NivelAcessoSuporteId = 1;
     }
 
     private void RedirecionarParaLogin(ActionExecutingContext context)

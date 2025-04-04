@@ -17,7 +17,6 @@ namespace WebEtiqueta.Controllers
             _authService            = authService;
             _config                 = config;
             _EmpresaService          = empresaService;
-            _nivelAcessoSuporteId   = _config.GetSection("Suporte:NivelAcessoId").Value;
         }
 
         [HttpGet]
@@ -29,8 +28,8 @@ namespace WebEtiqueta.Controllers
                 {
                     if(!Util.ValidaDocumento(id))
                     {
-                        TempData["AlertaTipo"] = "danger";
-                        TempData["AlertaMensagem"] = "CNPJ/CPF inválido";
+                        TempData["AlertaTipo"]      = "danger";
+                        TempData["AlertaMensagem"]  = "CNPJ/CPF inválido";
                         return View("Login");
                     }
 
@@ -74,8 +73,8 @@ namespace WebEtiqueta.Controllers
             {
                 return StatusCode(400, new
                 {
-                    Status      = false,
-                    Mensagem    = "Todos os dados são obrigatórios"
+                    status      = false,
+                    mensagem    = "Todos os dados são obrigatórios"
                 });
             }
             //     /VALIDAÇÃO BÁSICA.       //
@@ -92,9 +91,9 @@ namespace WebEtiqueta.Controllers
                 {
                     return StatusCode(400, new
                     {
-                        Status      = usuarioConsulta.Status,
-                        Mensagem    = usuarioConsulta.Mensagem,
-                        LogSuporte  = usuarioConsulta.LogSuporte
+                        status      = usuarioConsulta.Status,
+                        mensagem    = usuarioConsulta.Mensagem,
+                        logSuporte  = usuarioConsulta.LogSuporte
                     });
                 }
 
@@ -107,8 +106,8 @@ namespace WebEtiqueta.Controllers
                     {
                         return StatusCode(400, new
                         {
-                            Status = false,
-                            Mensagem = "Chave de segurança não configurada"
+                            status      = false,
+                            mensagem    = "Chave de segurança não configurada"
                         });
                     }
 
@@ -117,9 +116,9 @@ namespace WebEtiqueta.Controllers
                     {
                         return StatusCode(400, new
                         {
-                            Status      = jwt.Status,
-                            Mensagem    = jwt.Mensagem,
-                            LogSuporte  = jwt.LogSuporte
+                            status      = jwt.Status,
+                            mensagem    = jwt.Mensagem,
+                            logSuporte  = jwt.LogSuporte
                         });
                     }
 
@@ -127,8 +126,8 @@ namespace WebEtiqueta.Controllers
                     {
                         return StatusCode(400, new
                         {
-                            Status      = false,
-                            Mensagem    = "Erro ao gerar token de autenticação"
+                            status      = false,
+                            mensagem    = "Erro ao gerar token de autenticação"
                         });
                     }
 
@@ -143,66 +142,65 @@ namespace WebEtiqueta.Controllers
 
                     // CRIAÇÃO DE SESSÃO
                     string nivelAcesso = System.Text.Json.JsonSerializer.Serialize(usuario.NivelAcesso);
-                    //Console.WriteLine(nivelAcesso);
                     HttpContext.Session.SetString("NivelAcesso", nivelAcesso);
                     HttpContext.Session.SetString("UsuarioLogin", usuario.Login);
+                    HttpContext.Session.SetString("UsuarioId", usuario.Id.ToString());
                     HttpContext.Session.SetString("Empresa", usuario.Empresa.CnpjCpf);
 
                     return StatusCode(200, new
                     {
-                        Status      = true,
-                        Mensagem    = "Usuário autenticado com sucesso"
+                        status      = true,
+                        mensagem    = "Usuário autenticado com sucesso"
                     });
                 }
 
                 return StatusCode(400, new
                 {
-                    Status      = false,
-                    Mensagem    = "Usuário não encontrado"
+                    status      = false,
+                    mensagem    = "Usuário não encontrado"
                 });
             } catch (Exception e)
             {
                 return StatusCode(500, new
                 {
-                    Status      = false,
-                    Mensagem    = "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte",
-                    LogSuporte  = $"AuthController/ValidarLogin: {e.Message}"
+                    status      = false,
+                    mensagem    = "Erro ao autenticar usuário, tente novamente mais tarde ou entre em contato com o suporte",
+                    logSuporte  = $"AuthController/ValidarLogin: {e.Message}"
                 });
             }
         }
 
         [HttpPost]
-        public IActionResult SenhaSuporte(string suporteSenha)
+        public async Task<IActionResult> SenhaSuporte(string suporteSenha)
         {
             if (string.IsNullOrWhiteSpace(suporteSenha))
             {
                 return StatusCode(400, new
                 {
-                    Status      = false,
-                    Mensagem    = "Senha obrigatória"
+                    status      = false,
+                    mensagem    = "Senha obrigatória"
                 });
             }
 
             try
             {
                 string senha                = suporteSenha;
-
-                Resposta<bool> autorizado   = _authService.ValidarSenhaSuporte(senha);
+                Resposta<bool> autorizado   = await _authService.ValidarSenhaSuporte(senha);
                 if (!autorizado.Status)
                 {
                     return StatusCode(400, new
                     {
-                        Status      = autorizado.Status,
-                        Mensagem    = autorizado.Mensagem,
-                        LogSuporte  = autorizado.LogSuporte
+                        status      = autorizado.Status,
+                        mensagem    = autorizado.Mensagem,
+                        logSuporte  = autorizado.LogSuporte
                     });
                 }
                 else if (!autorizado.Dados)
                 {
                     return StatusCode(402, new
                     {
-                        Status      = false,
-                        Mensagem    = "Acesso não autorizado"
+                        status      = false,
+                        mensagem    = "Acesso não autorizado"
                     });
                 }
 
@@ -212,9 +210,9 @@ namespace WebEtiqueta.Controllers
             {
                 return StatusCode(500, new
                 {
-                    Status      = false,
-                    Mensagem    = "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte",
-                    LogSuporte  = $"AuthController/SenhaSuporte: {e.Message}"
+                    status      = false,
+                    mensagem    = "Erro ao validar senha de suporte, tente novamente mais tarde ou entre em contato com o suporte",
+                    logSuporte  = $"AuthController/SenhaSuporte: {e.Message}"
                 });
             }
         }
